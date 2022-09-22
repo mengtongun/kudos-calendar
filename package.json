@@ -10,8 +10,16 @@
   "dependencies": {
     "@aws-amplify/ui-vue": "^2.4.22",
     "@fontsource/inter": "^4.5.12",
+    "@fullcalendar/core": "^5.11.3",
+    "@fullcalendar/daygrid": "^5.11.3",
+    "@fullcalendar/interaction": "^5.11.3",
+    "@fullcalendar/list": "^5.11.3",
+    "@fullcalendar/timegrid": "^5.11.3",
+    "@fullcalendar/vue3": "^5.11.2",
     "aws-amplify": "^4.3.36",
     "core-js": "^3.8.3",
+    "primeicons": "^6.0.1",
+    "primevue": "^3.17.0",
     "vue": "^3.2.13",
     "vue-router": "^4.0.3",
     "vuex": "^4.0.0"
