@@ -1,0 +1,42 @@
+type UserLogs @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  UID: ID!
+  loginAt: AWSTimestamp
+  logoutAt: AWSTimestamp
+}
+
+enum StatusEnum {
+  ACTIVE
+  INACTIVE
+  DELETED
+}
+
+type Events @model @auth(rules: [{allow: private}]) {
+  id: ID!
+  UID: ID!
+  status: StatusEnum!
+  title: String!
+  description: String
+  url: String
+  start: AWSDateTime!
+  end: AWSDateTime!
+  allDay: Boolean!
+  startStr: AWSDate
+  endStr: AWSDate
+  classNames: String
+  editable: Boolean
+  startEditable: Boolean
+  durationEditable: Boolean
+  resourceEditable: Boolean
+  display: String
+  overlap: Boolean
+  constraint: String
+  backgroundColor: String
+  borderColor: String
+  textColor: String
+  extendedProps: AWSJSON
+  source: String
+  createdAt: AWSTimestamp
+  updatedAt: AWSTimestamp
+  groupId: String
+}

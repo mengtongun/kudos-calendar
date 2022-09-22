@@ -1,0 +1,20 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-kudoscalendar-staging-43217-authRole",
+      "UnauthRoleArn": "arn:aws:iam::701023977706:role/amplify-kudoscalendar-staging-43217-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::701023977706:role/amplify-kudoscalendar-staging-43217-authRole",
+      "Region": "ap-southeast-1",
+      "DeploymentBucketName": "amplify-kudoscalendar-staging-43217-deployment",
+      "UnauthRoleName": "amplify-kudoscalendar-staging-43217-unauthRole",
+      "StackName": "amplify-kudoscalendar-staging-43217",
+      "StackId": "arn:aws:cloudformation:ap-southeast-1:701023977706:stack/amplify-kudoscalendar-staging-43217/60377cd0-3966-11ed-8008-06a00bed38d2",
+      "AmplifyAppId": "d1717azopr6591"
+    },
+    "categories": {
+      "auth": {
+        "kudoscalendar": {}
+      }
+    }
+  }
+}
