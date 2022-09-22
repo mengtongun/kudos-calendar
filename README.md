@@ -1,4 +1,7 @@
-# kudos-calendar
+# Kudos Calendar Amplify x Vue3 Composition API
+
+### Objective
+Participate AWS Amplify Hackathon
 
 ## Project setup
 ```
