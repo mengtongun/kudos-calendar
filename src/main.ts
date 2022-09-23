@@ -15,6 +15,8 @@ import Column from "primevue/column";
 import DynamicDialog from "primevue/dynamicdialog";
 import Panel from "primevue/panel";
 import Menu from "primevue/menu";
+import Card from "primevue/card";
+import ColorPicker from "primevue/colorpicker";
 
 import FullCalendar from "@fullcalendar/vue3/dist/FullCalendar";
 
@@ -22,6 +24,7 @@ import "primevue/resources/themes/saga-blue/theme.css"; //theme
 import "primevue/resources/themes/vela-blue/theme.css"; //theme
 import "primevue/resources/primevue.min.css"; //core css
 import "primeicons/primeicons.css"; //icons
+import "primeflex/primeflex.scss";
 
 import AmplifyVue from "@aws-amplify/ui-vue";
 
@@ -43,6 +46,8 @@ app.component("Column", Column);
 app.component("DynamicDialog", DynamicDialog);
 app.component("Panel", Panel);
 app.component("Menu", Menu);
+app.component("Card", Card);
+app.component("ColorPicker", ColorPicker);
 
 app.component("FullCalendar", FullCalendar);
 
