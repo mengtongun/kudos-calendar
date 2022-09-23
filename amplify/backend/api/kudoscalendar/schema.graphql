@@ -11,9 +11,8 @@ enum StatusEnum {
   DELETED
 }
 
-type Events @model @auth(rules: [{allow: private}]) {
+type Events @model @auth(rules: [{allow: owner}]) {
   id: ID!
-  UID: ID!
   status: StatusEnum!
   title: String!
   description: String
@@ -40,3 +39,4 @@ type Events @model @auth(rules: [{allow: private}]) {
   updatedAt: AWSTimestamp
   groupId: String
 }
+ 

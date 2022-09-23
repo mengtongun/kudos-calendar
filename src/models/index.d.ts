@@ -25,7 +25,6 @@ export declare class UserLogs {
 
 export declare class Events {
   readonly id: string;
-  readonly UID: string;
   readonly status: StatusEnum | keyof typeof StatusEnum;
   readonly title: string;
   readonly description?: string | null;

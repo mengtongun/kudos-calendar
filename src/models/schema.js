@@ -83,13 +83,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "UID": {
-                    "name": "UID",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
                 "status": {
                     "name": "status",
                     "isArray": false,
@@ -280,7 +273,10 @@ export const schema = {
                     "properties": {
                         "rules": [
                             {
-                                "allow": "private",
+                                "provider": "userPools",
+                                "ownerField": "owner",
+                                "allow": "owner",
+                                "identityClaim": "cognito:username",
                                 "operations": [
                                     "create",
                                     "update",
@@ -305,5 +301,5 @@ export const schema = {
         }
     },
     "nonModels": {},
-    "version": "98e99842f5eccc66df6358ad9d411fdf"
+    "version": "e0353b9a59c6f2bd42028ce514267bd8"
 };
