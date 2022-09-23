@@ -94,6 +94,15 @@ export default kudos;
   <div class="kudos-app">
     <Toast />
     <DynamicDialog />
+
+    <div class="kudos-app-main">
+      <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
+        <template v-slot:eventContent="arg">
+          <b>{{ arg.timeText }}</b>
+          <i>{{ arg.event.title }}</i>
+        </template>
+      </FullCalendar>
+    </div>
     <div class="kudos-app-sidebar">
       <div class="kudos-app-sidebar-section">
         <h2>Instructions</h2>
@@ -118,14 +127,6 @@ export default kudos;
           </li>
         </ul>
       </div>
-    </div>
-    <div class="kudos-app-main">
-      <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
-        <template v-slot:eventContent="arg">
-          <b>{{ arg.timeText }}</b>
-          <i>{{ arg.event.title }}</i>
-        </template>
-      </FullCalendar>
     </div>
   </div>
 </template>
@@ -162,7 +163,7 @@ b {
   width: 300px;
   line-height: 1.5;
   background: #143340;
-  border-right: 1px solid #d3e2e8;
+  border-left: 1px solid #ccc;
 }
 
 .kudos-app-sidebar-section {
