@@ -1,100 +1,141 @@
-<script  lang='ts'>
-import { defineComponent } from "vue";
+<script setup lang='ts'>
 import "@fullcalendar/core/vdom"; // solve problem with Vite
-import FullCalendar, { CalendarOptions, EventApi, DateSelectArg, EventClickArg } from "@fullcalendar/vue3";
+import { CalendarOptions, EventApi, DateSelectArg, EventClickArg } from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { INITIAL_EVENTS, createEventId } from "../utils/event-utils";
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
+import { ref, defineExpose, h } from "vue";
+import { useToast } from "primevue/usetoast";
+import { useDialog } from "primevue/usedialog";
+import Button from "primevue/button";
+// Services
+const dialog = useDialog();
+const toast = useToast();
 
-const kudos = defineComponent({
-  components: {
-    FullCalendar,
+// Methods
+const handleDateSelect = (selectInfo: DateSelectArg) => {
+  let title = prompt("Please enter a new title for your event");
+  let calendarApi = selectInfo.view.calendar;
+
+  calendarApi.unselect(); // clear date selection
+
+  if (title) {
+    calendarApi.addEvent({
+      id: createEventId(),
+      title,
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay,
+    });
+  }
+};
+const handleEventClick = (clickInfo: EventClickArg) => {
+  const dialogRef = dialog.open(EventModalDetailVue, {
+    props: {
+      header: "Event Details",
+      style: "width: 30rem",
+      footer: "border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem;",
+      contentClass: "p-0",
+      closable: true,
+      draggable: true,
+      dismissableMask: true,
+      modal: true,
+    },
+    data: {
+      event: clickInfo.event,
+    },
+    templates: {
+      footer: () => {
+        return [
+          //  Edit and Delete Button
+          h(
+            Button,
+            {
+              label: "Edit",
+              icon: "pi pi-pencil",
+              onClick: () => {
+                toast.add({ severity: "success", summary: "Updated", detail: "Data Updated", life: 3000 });
+              },
+            },
+            {}
+          ),
+          h(
+            Button,
+            {
+              label: "Delete",
+              icon: "pi pi-trash",
+              class: "p-button-danger",
+              onClick: () => {
+                toast.add({ severity: "warn", summary: "Delete", detail: "Data Deleted", life: 3000 });
+              },
+            },
+            {}
+          ),
+        ];
+      },
+    },
+  });
+
+  console.log(clickInfo);
+
+  // if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
+  //   clickInfo.event.remove();
+  // }
+};
+const handleEvents = (events: EventApi[]) => {
+  currentEvents.value = events;
+};
+
+// State
+const calendarOptions = ref<CalendarOptions>({
+  plugins: [
+    dayGridPlugin,
+    timeGridPlugin,
+    interactionPlugin, // needed for dateClick
+  ],
+  headerToolbar: {
+    left: "prev,next today",
+    center: "title",
+    right: "dayGridMonth,timeGridWeek,timeGridDay",
   },
-
-  data() {
-    return {
-      calendarOptions: {
-        plugins: [
-          dayGridPlugin,
-          timeGridPlugin,
-          interactionPlugin, // needed for dateClick
-        ],
-        headerToolbar: {
-          left: "prev,next today",
-          center: "title",
-          right: "dayGridMonth,timeGridWeek,timeGridDay",
-        },
-        initialView: "dayGridMonth",
-        initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
-        editable: true,
-        selectable: true,
-        selectMirror: true,
-        dayMaxEvents: true,
-        weekends: true,
-        select: this.handleDateSelect,
-        eventClick: this.handleEventClick,
-        eventsSet: this.handleEvents,
-        /* you can update a remote database when these fire:
+  initialView: "dayGridMonth",
+  initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+  editable: true,
+  selectable: true,
+  selectMirror: true,
+  dayMaxEvents: true,
+  weekends: true,
+  select: handleDateSelect,
+  eventClick: handleEventClick,
+  eventsSet: handleEvents,
+  /* you can update a remote database when these fire:
         eventAdd:
         eventChange:
         eventRemove:
         */
-      } as CalendarOptions,
-      currentEvents: [] as EventApi[],
-    };
-  },
-  methods: {
-    handleWeekendsToggle() {
-      this.calendarOptions.weekends = !this.calendarOptions.weekends; // update a property
-    },
-    handleDateSelect(selectInfo: DateSelectArg) {
-      let title = prompt("Please enter a new title for your event");
-      let calendarApi = selectInfo.view.calendar;
-
-      calendarApi.unselect(); // clear date selection
-
-      if (title) {
-        calendarApi.addEvent({
-          id: createEventId(),
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          allDay: selectInfo.allDay,
-        });
-      }
-    },
-    handleEventClick(clickInfo: EventClickArg) {
-      this.$dialog.open(EventModalDetailVue, {
-        props: {
-          header: "Event Details",
-          style: "width: 50vw",
-        },
-        data: {
-          event: clickInfo.event,
-        },
-      });
-
-      console.log(clickInfo);
-
-      // if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
-      //   clickInfo.event.remove();
-      // }
-    },
-    handleEvents(events: EventApi[]) {
-      this.currentEvents = events;
-    },
-  },
 });
-export default kudos;
+const currentEvents = ref<EventApi[]>([]);
+
+const handleWeekendsToggle = () => {
+  calendarOptions.value.weekends = !calendarOptions.value.weekends; // update a property
+};
+
+defineExpose({
+  handleWeekendsToggle,
+  handleDateSelect,
+  handleEventClick,
+  handleEvents,
+  calendarOptions,
+  currentEvents,
+});
 </script>
 
 <template>
   <div class="kudos-app">
     <Toast />
     <DynamicDialog />
-
     <div class="kudos-app-main">
       <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
         <template v-slot:eventContent="arg">
