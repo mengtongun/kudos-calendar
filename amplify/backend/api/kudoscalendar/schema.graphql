@@ -20,8 +20,6 @@ type Events @model @auth(rules: [{allow: owner}]) {
   start: AWSDateTime!
   end: AWSDateTime!
   allDay: Boolean!
-  startStr: AWSDate
-  endStr: AWSDate
   classNames: String
   editable: Boolean
   startEditable: Boolean
@@ -33,10 +31,10 @@ type Events @model @auth(rules: [{allow: owner}]) {
   backgroundColor: String
   borderColor: String
   textColor: String
-  extendedProps: AWSJSON
+  extendedProps: String
   source: String
-  createdAt: AWSTimestamp
-  updatedAt: AWSTimestamp
+  createdAt: AWSDateTime
+  updatedAt: AWSDateTime
   groupId: String
 }
  

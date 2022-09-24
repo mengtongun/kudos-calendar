@@ -134,20 +134,6 @@ export const schema = {
                     "isRequired": true,
                     "attributes": []
                 },
-                "startStr": {
-                    "name": "startStr",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "endStr": {
-                    "name": "endStr",
-                    "isArray": false,
-                    "type": "AWSDate",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "classNames": {
                     "name": "classNames",
                     "isArray": false,
@@ -228,7 +214,7 @@ export const schema = {
                 "extendedProps": {
                     "name": "extendedProps",
                     "isArray": false,
-                    "type": "AWSJSON",
+                    "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -242,14 +228,14 @@ export const schema = {
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
-                    "type": "AWSTimestamp",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
                 "updatedAt": {
                     "name": "updatedAt",
                     "isArray": false,
-                    "type": "AWSTimestamp",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -301,5 +287,5 @@ export const schema = {
         }
     },
     "nonModels": {},
-    "version": "e0353b9a59c6f2bd42028ce514267bd8"
+    "version": "d93045f445969929bf2159eb26e91510"
 };

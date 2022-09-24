@@ -32,8 +32,6 @@ export declare class Events {
   readonly start: string;
   readonly end: string;
   readonly allDay: boolean;
-  readonly startStr?: string | null;
-  readonly endStr?: string | null;
   readonly classNames?: string | null;
   readonly editable?: boolean | null;
   readonly startEditable?: boolean | null;
@@ -47,8 +45,8 @@ export declare class Events {
   readonly textColor?: string | null;
   readonly extendedProps?: string | null;
   readonly source?: string | null;
-  readonly createdAt?: number | null;
-  readonly updatedAt?: number | null;
+  readonly createdAt?: string | null;
+  readonly updatedAt?: string | null;
   readonly groupId?: string | null;
   constructor(init: ModelInit<Events>);
   static copyOf(source: Events, mutator: (draft: MutableModel<Events>) => MutableModel<Events> | void): Events;
