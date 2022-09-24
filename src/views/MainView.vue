@@ -5,34 +5,57 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { INITIAL_EVENTS, createEventId } from "../utils/event-utils";
+// @ts-ignore
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
-import { ref, defineExpose, h } from "vue";
+// @ts-ignore
+import EventModalFormVue from "@/components/EventModalForm.vue";
+import { ref, defineExpose, h, onBeforeMount } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
 import Button from "primevue/button";
+import { useStore } from "vuex";
+
+const commonDialogConfig = {
+  closable: true,
+  closeOnEscape: false,
+  modal: true,
+};
+
 // Services
 const dialog = useDialog();
 const toast = useToast();
+const store = useStore();
 
 // Methods
 const handleDateSelect = (selectInfo: DateSelectArg) => {
-  let title = prompt("Please enter a new title for your event");
-  let calendarApi = selectInfo.view.calendar;
+  dialog.open(EventModalFormVue, {
+    props: {
+      header: "Edit Event",
+      ...commonDialogConfig,
+      closeOnEscape: true,
+      modal: true,
+      dismissableMask: true,
+    },
+    data: {
+      event: selectInfo,
+    },
+  });
+  const calendarApi = selectInfo.view.calendar;
 
   calendarApi.unselect(); // clear date selection
 
-  if (title) {
-    calendarApi.addEvent({
-      id: createEventId(),
-      title,
-      start: selectInfo.startStr,
-      end: selectInfo.endStr,
-      allDay: selectInfo.allDay,
-    });
-  }
+  // if (title) {
+  //   calendarApi.addEvent({
+  //     id: createEventId(),
+  //     title,
+  //     start: selectInfo.startStr,
+  //     end: selectInfo.endStr,
+  //     allDay: selectInfo.allDay,
+  //   });
+  // }
 };
 const handleEventClick = (clickInfo: EventClickArg) => {
-  const dialogRef = dialog.open(EventModalDetailVue, {
+  const viewDialogRef = dialog.open(EventModalDetailVue, {
     props: {
       header: "Event Details",
       style: "width: 30rem",
@@ -56,7 +79,16 @@ const handleEventClick = (clickInfo: EventClickArg) => {
               label: "Edit",
               icon: "pi pi-pencil",
               onClick: () => {
-                toast.add({ severity: "success", summary: "Updated", detail: "Data Updated", life: 3000 });
+                viewDialogRef.close();
+                dialog.open(EventModalFormVue, {
+                  props: {
+                    header: "Edit Event",
+                    ...commonDialogConfig,
+                  },
+                  data: {
+                    event: clickInfo.event,
+                  },
+                });
               },
             },
             {}
@@ -78,8 +110,6 @@ const handleEventClick = (clickInfo: EventClickArg) => {
     },
   });
 
-  console.log(clickInfo);
-
   // if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'`)) {
   //   clickInfo.event.remove();
   // }
@@ -87,7 +117,9 @@ const handleEventClick = (clickInfo: EventClickArg) => {
 const handleEvents = (events: EventApi[]) => {
   currentEvents.value = events;
 };
+store.dispatch("fetchEvents");
 
+console.log("event", store.state.events);
 // State
 const calendarOptions = ref<CalendarOptions>({
   plugins: [
@@ -138,7 +170,7 @@ defineExpose({
     <DynamicDialog />
     <div class="kudos-app-main">
       <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
-        <template v-slot:eventContent="arg">
+        <template #eventContent="arg">
           <b>{{ arg.timeText }}</b>
           <i>{{ arg.event.title }}</i>
         </template>
