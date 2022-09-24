@@ -3,8 +3,9 @@ import { EventApiData } from "@/types";
 import { inject, onBeforeMount, onUpdated, reactive, Ref, ref } from "vue";
 import { useStore } from "vuex";
 import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR } from "@/constants";
-import { DateSelectArg } from "@fullcalendar/common";
+import { CalendarApi, DateSelectArg } from "@fullcalendar/common";
 import { useToast } from "primevue/usetoast";
+import { createEventId } from "@/utils/event-utils";
 const store = useStore();
 const toast = useToast();
 
@@ -38,10 +39,44 @@ onBeforeMount(() => {
     state.extendedProps = event.extendedProps;
   }
 });
+
 onUpdated(() => {
   console.log("state", state);
 });
 const onAddEvent = () => {
+  console.log("state", state);
+  const calendarApi = dialogRef.value.data.calendarApi as CalendarApi;
+  toast.add({ severity: "success", summary: "Success", detail: "Event Added", life: 3000 });
+  if (state.id) {
+    calendarApi.addEvent({
+      id: state.id,
+      title: state.title,
+      start: state.start,
+      end: state.end,
+      allDay: state.allDay,
+      description: state.description,
+      backgroundColor: state.backgroundColor,
+      borderColor: state.borderColor,
+      textColor: state.textColor,
+      extendedProps: state.extendedProps,
+    });
+    return;
+  }
+  calendarApi.addEvent({
+    id: createEventId(),
+    title: state.title,
+    start: state.start,
+    end: state.end,
+    allDay: state.allDay,
+    description: state.description,
+    backgroundColor: state.backgroundColor,
+    borderColor: state.borderColor,
+    textColor: state.textColor,
+    extendedProps: state.extendedProps,
+  });
+  dialogRef.value.close();
+};
+const onAddEvent1 = () => {
   if (!state.title) {
     toast.add({
       severity: "error",
@@ -61,6 +96,7 @@ const onAddEvent = () => {
     return;
   }
   is_loading.value = true;
+  console.log("id event", state.id);
   store
     .dispatch(`${!state.id ? "addEvent" : "updateEvent"}`, state)
     .then(() => {
@@ -83,6 +119,7 @@ const onAddEvent = () => {
     })
     .finally(() => {
       is_loading.value = false;
+      dialogRef.value.close();
     });
 };
 </script>

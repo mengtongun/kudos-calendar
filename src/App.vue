@@ -8,12 +8,10 @@
 import { useAuthenticator } from "@aws-amplify/ui-vue";
 import "@aws-amplify/ui-vue/styles.css";
 import "@fontsource/inter/variable.css";
-
 import { Amplify } from "aws-amplify";
 import awsmobile from "./aws-exports";
 import UnAuthView from "./views/UnAuthView.vue";
 const auth = useAuthenticator();
-
 Amplify.configure(awsmobile);
 </script>
 

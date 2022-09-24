@@ -1,19 +1,21 @@
 <script setup lang='ts'>
 import "@fullcalendar/core/vdom"; // solve problem with Vite
-import { CalendarOptions, EventApi, DateSelectArg, EventClickArg } from "@fullcalendar/vue3";
+import { CalendarOptions, EventApi, DateSelectArg, EventClickArg, EventSourceInput } from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { INITIAL_EVENTS, createEventId } from "../utils/event-utils";
 // @ts-ignore
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
 // @ts-ignore
 import EventModalFormVue from "@/components/EventModalForm.vue";
-import { ref, defineExpose, h, onBeforeMount } from "vue";
+import { ref, defineExpose, h, onBeforeMount, onUpdated } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
 import Button from "primevue/button";
 import { useStore } from "vuex";
+import { Auth, DataStore } from "aws-amplify";
+import { useAuthenticator } from "@aws-amplify/ui-vue";
+import { Events } from "@/models";
 
 const commonDialogConfig = {
   closable: true,
@@ -25,6 +27,7 @@ const commonDialogConfig = {
 const dialog = useDialog();
 const toast = useToast();
 const store = useStore();
+const auth = useAuthenticator();
 
 // Methods
 const handleDateSelect = (selectInfo: DateSelectArg) => {
@@ -38,21 +41,12 @@ const handleDateSelect = (selectInfo: DateSelectArg) => {
     },
     data: {
       event: selectInfo,
+      calendarApi: selectInfo.view.calendar,
     },
   });
   const calendarApi = selectInfo.view.calendar;
 
-  calendarApi.unselect(); // clear date selection
-
-  // if (title) {
-  //   calendarApi.addEvent({
-  //     id: createEventId(),
-  //     title,
-  //     start: selectInfo.startStr,
-  //     end: selectInfo.endStr,
-  //     allDay: selectInfo.allDay,
-  //   });
-  // }
+  calendarApi.unselect();
 };
 const handleEventClick = (clickInfo: EventClickArg) => {
   const viewDialogRef = dialog.open(EventModalDetailVue, {
@@ -72,7 +66,6 @@ const handleEventClick = (clickInfo: EventClickArg) => {
     templates: {
       footer: () => {
         return [
-          //  Edit and Delete Button
           h(
             Button,
             {
@@ -87,6 +80,7 @@ const handleEventClick = (clickInfo: EventClickArg) => {
                   },
                   data: {
                     event: clickInfo.event,
+                    calendarApi: clickInfo.view.calendar,
                   },
                 });
               },
@@ -117,10 +111,23 @@ const handleEventClick = (clickInfo: EventClickArg) => {
 const handleEvents = (events: EventApi[]) => {
   currentEvents.value = events;
 };
-store.dispatch("fetchEvents");
+const setInitEvents = async () => {
+  is_fetching.value = true;
+  const events = await DataStore.query(Events);
+  calendarOptions.value.initialEvents = events as any;
+  is_fetching.value = false;
+};
 
-console.log("event", store.state.events);
+onBeforeMount(() => {
+  setInitEvents();
+});
+
+onUpdated(() => {
+  console.log("event", store.state.events);
+});
 // State
+const is_loading = ref<boolean>(false);
+const is_fetching = ref<boolean>(false);
 const calendarOptions = ref<CalendarOptions>({
   plugins: [
     dayGridPlugin,
@@ -133,7 +140,7 @@ const calendarOptions = ref<CalendarOptions>({
     right: "dayGridMonth,timeGridWeek,timeGridDay",
   },
   initialView: "dayGridMonth",
-  initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+  initialEvents: [], // alternatively, use the `events` setting to fetch from a feed
   editable: true,
   selectable: true,
   selectMirror: true,
@@ -142,6 +149,12 @@ const calendarOptions = ref<CalendarOptions>({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
+  eventAdd: async (event) => {
+    is_loading.value = true;
+  },
+  eventChange: async (event) => {
+    console.log("event change", event);
+  },
   /* you can update a remote database when these fire:
         eventAdd:
         eventChange:
@@ -149,58 +162,71 @@ const calendarOptions = ref<CalendarOptions>({
         */
 });
 const currentEvents = ref<EventApi[]>([]);
-
 const handleWeekendsToggle = () => {
   calendarOptions.value.weekends = !calendarOptions.value.weekends; // update a property
 };
+const logout = async () => {
+  is_loading.value = true;
+  await Auth.signOut();
+  is_loading.value = false;
+  window.location.reload();
+};
 
-defineExpose({
-  handleWeekendsToggle,
-  handleDateSelect,
-  handleEventClick,
-  handleEvents,
-  calendarOptions,
-  currentEvents,
-});
+import Skeleton from "primevue/skeleton";
 </script>
 
 <template>
   <div class="kudos-app">
-    <Toast />
-    <DynamicDialog />
-    <div class="kudos-app-main">
-      <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
-        <template #eventContent="arg">
-          <b>{{ arg.timeText }}</b>
-          <i>{{ arg.event.title }}</i>
-        </template>
-      </FullCalendar>
-    </div>
-    <div class="kudos-app-sidebar">
-      <div class="kudos-app-sidebar-section">
-        <h2>Instructions</h2>
-        <ul>
-          <li>Select dates and you will be prompted to create a new event</li>
-          <li>Drag, drop, and resize events</li>
-          <li>Click an event to delete it</li>
-        </ul>
+    <Skeleton v-if="is_fetching" />
+    <template v-else>
+      <Toast />
+      <DynamicDialog />
+      <div class="kudos-app-main">
+        <FullCalendar class="kudos-app-calendar" :options="calendarOptions">
+          <template #eventContent="arg">
+            <b>{{ arg.timeText }}</b>
+            <i>{{ arg.event.title }}</i>
+          </template>
+        </FullCalendar>
       </div>
-      <div class="kudos-app-sidebar-section">
-        <label>
+      <div class="kudos-app-sidebar">
+        <!-- //* Profile View -->
+        <div class="flex flex-row justify-content-evenly">
+          <div class="block">
+            <div>
+              <img src="https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png" alt="" />
+            </div>
+            <div>
+              <h3>{{ auth.user.attributes.name }}</h3>
+              <p>Software Engineer</p>
+            </div>
+          </div>
+          <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger border-round-lg" @click="logout" :loading="is_loading" />
+        </div>
+
+        <div class="px-4 pt-4">
+          <h2>Instructions</h2>
+          <ul>
+            <li>Select dates and you will be prompted to create a new event</li>
+            <li>Drag, drop, and resize events</li>
+            <li>Click an event to delete it</li>
+          </ul>
+        </div>
+        <div class="px-4 flex flex-row justify-content-start align-item-center">
+          <p class="">Show Weekend</p>
           <input type="checkbox" :checked="calendarOptions.weekends" @change="handleWeekendsToggle" />
-          toggle weekends
-        </label>
+        </div>
+        <div class="p-4">
+          <h2>All Events ({{ currentEvents.length }})</h2>
+          <ul>
+            <li v-for="event in currentEvents" :key="event.id">
+              <b>{{ event.startStr }}</b>
+              <i>{{ event.title }}</i>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="kudos-app-sidebar-section">
-        <h2>All Events ({{ currentEvents.length }})</h2>
-        <ul>
-          <li v-for="event in currentEvents" :key="event.id">
-            <b>{{ event.startStr }}</b>
-            <i>{{ event.title }}</i>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -237,10 +263,6 @@ b {
   line-height: 1.5;
   background: #143340;
   border-left: 1px solid #ccc;
-}
-
-.kudos-app-sidebar-section {
-  padding: 2em;
 }
 
 .kudos-app-main {
