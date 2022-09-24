@@ -1,20 +1,20 @@
 <template>
   <authenticator :form-fields="formFields">
-    <template v-slot:header>
+    <template #header>
       <div style="padding: var(--amplify-space-large); text-align: center; margin-bottom: -120px; margin-top: -120px">
         <img class="amplify-image" alt="Amplify logo" src="logo.png" style="transform: scale(0.4)" />
       </div>
     </template>
 
-    <template v-slot:sign-in-header>
+    <template #sign-in-header>
       <h3 class="amplify-heading" style="padding: var(--amplify-space-xl) 0 0 var(--amplify-space-xl); font-weight: bold">Sign in to your Kudos Calendar</h3>
     </template>
 
-    <template v-slot:sign-up-header>
+    <template #sign-up-header>
       <h3 class="amplify-heading" style="padding: var(--amplify-space-xl) 0 0 var(--amplify-space-xl); font-weight: bold">Create a new Kudos Member</h3>
     </template>
 
-    <template v-slot:footer>
+    <template #footer>
       <div style="padding: var(--amplify-space-large); text-align: center">
         <p class="amplify-text" style="color: var(--amplify-colors-neutral-80)">© All Rights Reserved 2022</p>
       </div>
