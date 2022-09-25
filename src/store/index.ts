@@ -8,24 +8,15 @@ import { EventApiData } from "@/types";
 import { DataStore } from "aws-amplify";
 import { createStore } from "vuex";
 
-declare type UserInfo = {
-	id: string;
-	name: string;
-	email: string;
-};
-
 export default createStore({
-	state: { events: [] as Events[], userInfo: {} as UserInfo },
-	getters: {
-		getEvents: (state) => state.events,
-	},
+	state: { events: [] as Events[] },
+	getters: {},
 	mutations: {},
 	actions: {
 		async fetchEvents({ commit, state }) {
 			const events = await DataStore.query(Events);
 			state.events = events.filter((e) => e.status === StatusEnum.ACTIVE);
 			return events;
-			console.log("events", events);
 		},
 		addEvent({ commit }, event: EventApiData) {
 			const data = {
