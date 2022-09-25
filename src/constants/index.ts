@@ -14,3 +14,15 @@ export const TOAST_SUCCESS_CONFIG = {
 	detail: "Success Message",
 	life: 3000,
 };
+export const Mutates = {
+	ADD_EVENT: "ADD_EVENT",
+	DEL_EVENT: "DEL_EVENT",
+	UPDATE_EVENT: "UPDATE_EVENT",
+};
+
+export const Actions = {
+	fetchEvents: "fetchEvents",
+	addEvent: "addEvent",
+	delEvent: "delEvent",
+	updateEvent: "updateEvent",
+};

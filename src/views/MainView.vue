@@ -8,7 +8,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
 // @ts-ignore
 import EventModalFormVue from "@/components/EventModalForm.vue";
-import { ref, h, onBeforeMount, onUpdated } from "vue";
+import { ref, h, onBeforeMount, onUpdated, computed } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
 import Button from "primevue/button";
@@ -85,7 +85,6 @@ const handleEventClick = (clickInfo: EventClickArg) => {
             icon: "pi pi-trash",
             class: "p-button-danger",
             onClick: () => {
-              clickInfo.event.remove();
               store.dispatch("delEvent", clickInfo.event);
               viewDialogRef.close();
               toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Deleted" });
@@ -101,8 +100,8 @@ const handleEvents = (events: EventApi[]) => {
 };
 const setInitEvents = async () => {
   is_fetching.value = true;
-  const events = await store.dispatch("fetchEvents");
-  calendarOptions.value.events = events;
+  await store.dispatch("fetchEvents");
+  calendarOptions.value.events = events.value;
   is_fetching.value = false;
 };
 const onToggleWeekend = () => {
@@ -128,6 +127,8 @@ const onEventInList = (event: EventApi) => {
 const is_loading = ref<boolean>(false);
 const is_fetching = ref<boolean>(false);
 const currentEvents = ref<EventApi[]>([]);
+const events = computed(() => store.state.events);
+const userName = computed(() => auth.user.attributes.name);
 const calendarOptions = ref<CalendarOptions>({
   plugins: [
     dayGridPlugin,
@@ -145,23 +146,24 @@ const calendarOptions = ref<CalendarOptions>({
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
+  initialEvents: [],
   events: [],
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-  eventAdd: async (event) => {
-    if (event.event.id) {
-      await store.dispatch("updateEvent", event.event);
-      toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
-      return;
-    }
-    await store.dispatch("addEvent", event.event);
-    toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Added" });
-  },
-  eventChange: async (event) => {
-    await store.dispatch("updateEvent", event.event);
-    toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
-  },
+  // eventAdd: async (event) => {
+  //   if (event.event.id) {
+  //     await store.dispatch("updateEvent", event.event);
+  //     toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
+  //     return;
+  //   }
+  //   await store.dispatch("addEvent", event.event);
+  //   toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Added" });
+  // },
+  // eventChange: async (event) => {
+  //   await store.dispatch("updateEvent", event.event);
+  //   toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
+  // },
 });
 
 const logout = async () => {
@@ -193,8 +195,12 @@ onUpdated(() => {
       <FullCalendar class="p-3" :options="calendarOptions">
         <template #eventContent="arg">
           <!-- // TODO: Phase 2 -->
-          <b>{{ arg.event.start.toLocaleTimeString() }} {{ arg.event.allDay ? "" : "- " }} </b>
-          <i>{{ arg.event.title }}</i>
+          <template v-if="!arg.textTime">
+            <b>{{ arg.event.start.toLocaleTimeString() }} - </b>
+            <i>{{ arg.event.title }}</i>
+          </template>
+          <i v-else>{{ arg.event.title }}</i>
+          <pre>{{ arg }}</pre>
         </template>
       </FullCalendar>
 
@@ -205,7 +211,7 @@ onUpdated(() => {
             <img src="logo.png" alt="logo" width="145" height="145" />
           </div>
           <div>
-            <h3>{{ auth.user.attributes.name }}</h3>
+            <h3>{{ userName }}</h3>
             <p class="font-italic">Calendar for Kudos 🚀</p>
             <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger" @click="logout" :loading="is_loading" />
           </div>

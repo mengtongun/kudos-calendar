@@ -1,6 +1,8 @@
 import {
 	FORM_DEFAULT_TEXT_COLOR,
 	FORM_DEFAULT_BORDER_COLOR,
+	Mutates,
+	Actions,
 } from "./../constants/index";
 import { FORM_DEFAULT_BG_COLOR } from "@/constants";
 import { Events, StatusEnum } from "@/models";
@@ -19,15 +21,30 @@ export default createStore({
 	getters: {
 		getEvents: (state) => state.events,
 	},
-	mutations: {},
+	mutations: {
+		[Mutates.ADD_EVENT](state, event) {
+			state.events.push(event);
+		},
+		[Mutates.DEL_EVENT](state, event) {
+			state.events = state.events.filter((e) => e.id !== event.id);
+		},
+		[Mutates.UPDATE_EVENT](state, event) {
+			state.events = state.events.map((e) => {
+				if (e.id === event.id) {
+					return event;
+				} else {
+					return e;
+				}
+			});
+		},
+	},
 	actions: {
-		async fetchEvents({ commit, state }) {
+		async [Actions.fetchEvents]({ commit, state }) {
 			const events = await DataStore.query(Events);
 			state.events = events.filter((e) => e.status === StatusEnum.ACTIVE);
-			return events;
-			console.log("events", events);
+			state.events = events;
 		},
-		addEvent({ commit }, event: EventApiData) {
+		[Actions.addEvent]({ commit }, event: EventApiData) {
 			const data = {
 				status: StatusEnum.ACTIVE,
 				title: event.title,
@@ -47,6 +64,7 @@ export default createStore({
 			return new Promise((resolve, reject) => {
 				DataStore.save(new Events(data))
 					.then((res) => {
+						commit(Mutates.ADD_EVENT, res);
 						resolve(res);
 					})
 					.catch((err) => {
@@ -55,10 +73,11 @@ export default createStore({
 					});
 			});
 		},
-		delEvent({ commit }, event) {
+		[Actions.delEvent]({ commit }, event) {
 			return new Promise((resolve, reject) => {
 				DataStore.delete(Events, event.id)
 					.then((res) => {
+						commit(Mutates.DEL_EVENT, event);
 						resolve(res);
 					})
 					.catch((err) => {
@@ -67,7 +86,7 @@ export default createStore({
 					});
 			});
 		},
-		async updateEvent({ commit }, event) {
+		async [Actions.updateEvent]({ commit }, event) {
 			const eventRes = await DataStore.query(Events, event.id);
 			if (!eventRes) return new Error("Event not found");
 
@@ -89,6 +108,7 @@ export default createStore({
 					Events.copyOf(eventRes, (updated) => Object.assign(updated, data))
 				)
 					.then((res) => {
+						commit(Mutates.UPDATE_EVENT, res);
 						resolve(res);
 					})
 					.catch((err) => {

@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { EventApiData } from "@/types";
 import { inject, onBeforeMount, onUpdated, reactive, Ref, ref } from "vue";
-import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
+import { Actions, FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/common";
 import { useToast } from "primevue/usetoast";
 import { Storage } from "@aws-amplify/storage";
+import { useStore } from "vuex";
 
 // **** SERVICES ****
 const toast = useToast();
+const store = useStore();
 
 // **** STATE ****
 const eventRef = ref<EventApiData>();
@@ -29,12 +31,11 @@ const state = reactive({
 });
 
 // **** METHODS ****
-const onAddEvent = () => {
+const onAddEvent = async () => {
   if (!state.start || !state.end) {
     toast.add({ ...TOAST_ERROR_CONFIG, detail: "Start and End date are required" });
     return;
   }
-  const calendarApi = dialogRef.value.data.calendarApi as CalendarApi;
   const event = {
     id: state.id || "",
     title: state.title || "No Title",
@@ -48,14 +49,14 @@ const onAddEvent = () => {
     img: state.img,
   };
   if (state.id) {
-    eventRef.value?.remove();
+    await store.dispatch(Actions.updateEvent, event);
+  } else {
+    await store.dispatch(Actions.addEvent, event);
   }
-  calendarApi.addEvent(event);
   dialogRef.value.close();
 };
 /* eslint-disable */
 const onUploader = async (event: any) => {
-  console.log(event);
   const file = event.files[0] as File;
   const res = await Storage.put(file.name, file, {
     level: "private",
@@ -93,10 +94,6 @@ onBeforeMount(() => {
       img_url.value = res;
     });
   }
-});
-
-onUpdated(() => {
-  console.log("state", state);
 });
 </script>
 
