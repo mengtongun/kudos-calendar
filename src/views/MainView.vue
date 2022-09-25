@@ -153,7 +153,6 @@ const calendarOptions = ref<CalendarOptions>({
     if (event.event.id) {
       await store.dispatch("updateEvent", event.event);
       toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
-      console.log("This is Update", event.event);
       return;
     }
     await store.dispatch("addEvent", event.event);
@@ -162,7 +161,6 @@ const calendarOptions = ref<CalendarOptions>({
   eventChange: async (event) => {
     await store.dispatch("updateEvent", event.event);
     toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
-    console.log("Update Event");
   },
 });
 
@@ -194,7 +192,8 @@ onUpdated(() => {
       <DynamicDialog />
       <FullCalendar class="p-3" :options="calendarOptions">
         <template #eventContent="arg">
-          <b>{{ arg.timeText }} - </b>
+          <!-- // TODO: Phase 2 -->
+          <b>{{ arg.event.start.toLocaleTimeString() }} {{ arg.event.allDay ? "" : "- " }} </b>
           <i>{{ arg.event.title }}</i>
         </template>
       </FullCalendar>
@@ -207,7 +206,7 @@ onUpdated(() => {
           </div>
           <div>
             <h3>{{ auth.user.attributes.name }}</h3>
-            <p>Software Engineer</p>
+            <p class="font-italic">Calendar for Kudos 🚀</p>
             <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger" @click="logout" :loading="is_loading" />
           </div>
         </div>
@@ -268,13 +267,17 @@ onUpdated(() => {
   max-height: 100vw;
 }
 
-.w-80vw {
-  width: 80vw;
-}
-.max-w-150rem {
-  max-width: 170rem;
-}
 .p-image-toolbar {
   z-index: 1000;
+}
+.p-dialog-header {
+  border-bottom: 1px solid #ffffff;
+}
+.kudos-event-time {
+  font-size: 0.8em;
+  padding: 0.2em 0.5em;
+  border-radius: 0.3em;
+  margin-bottom: 0.2em;
+  width: 15em;
 }
 </style>

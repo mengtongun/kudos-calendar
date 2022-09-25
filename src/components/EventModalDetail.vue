@@ -23,7 +23,7 @@ onMounted(() => {
     <template #header>
       <div v-if="event.extendedProps?.img" class="flex flex-row item-center">
         <Image v-show="!img_loading" class="mx-auto border-round-md px-1" imagClass="w-25rem border-round-md" :src="img" :alt="event.extendedProps.img" preview @load="img_loading = false" />
-        <Skeleton v-show="img_loading" class="mx-auto w-25rem h-10rem border-round-md" />
+        <Skeleton v-show="img_loading" class="mx-auto w-28rem h-10rem border-round-md" />
       </div>
     </template>
     <template #title>
@@ -62,7 +62,9 @@ onMounted(() => {
         <i class="pi pi-info-circle my-auto" style="font-size: 1.5rem" />
         <p class="ml-2">Description</p>
       </div>
-      <div v-html="event.extendedProps.description"></div>
+      <div v-if="event.extendedProps.description">
+        <div class="m-2" v-html="event.extendedProps.description"></div>
+      </div>
     </template>
   </Card>
 </template>

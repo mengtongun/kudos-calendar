@@ -30,11 +30,6 @@ const state = reactive({
 
 // **** METHODS ****
 const onAddEvent = () => {
-  console.log("state", state);
-  if (!state.title) {
-    toast.add({ ...TOAST_ERROR_CONFIG, detail: "Title is required" });
-    return;
-  }
   if (!state.start || !state.end) {
     toast.add({ ...TOAST_ERROR_CONFIG, detail: "Start and End date are required" });
     return;
@@ -42,7 +37,7 @@ const onAddEvent = () => {
   const calendarApi = dialogRef.value.data.calendarApi as CalendarApi;
   const event = {
     id: state.id || "",
-    title: state.title,
+    title: state.title || "No Title",
     start: state.start,
     end: state.end,
     allDay: state.allDay,
@@ -58,7 +53,7 @@ const onAddEvent = () => {
   calendarApi.addEvent(event);
   dialogRef.value.close();
 };
-
+/* eslint-disable */
 const onUploader = async (event: any) => {
   console.log(event);
   const file = event.files[0] as File;
@@ -147,16 +142,23 @@ onUpdated(() => {
       </div>
 
       <!-- //* Event Image Upload -->
-      <div v-if="!state.img" class="flex flex-row justify-content-start mt-4">
-        <input type="checkbox" :checked="isImg" @change="isImg = !isImg" />
-        <p class="my-auto mr-4 font-bold cursor-pointer" @click="isImg = !isImg">Event Image</p>
-        <FileUpload v-if="isImg" name="img[]" :multiple="false" accept="image/*" :maxFileSize="5000000" :customUpload="true" @uploader="onUploader" />
+      <div class="mt-4" v-if="!state.img">
+        <div class="flex flex-row justify-content-start">
+          <input type="checkbox" :checked="isImg" @change="isImg = !isImg" />
+          <p class="my-auto mr-4 font-bold cursor-pointer" @click="isImg = !isImg">Event Image</p>
+        </div>
+        <div class="flex flex-row justify-content-start mt-2">
+          <FileUpload v-if="isImg" name="img[]" :multiple="false" accept="image/*" :previewWidth="250" :maxFileSize="5000000" :customUpload="true" @uploader="onUploader" />
+        </div>
       </div>
+
       <!-- //* Image Display -->
-      <div v-else class="flex flex-row justify-content-start">
-        <!-- click image close preview -->
-        <Image v-show="!img_loading" class="my-4" imageClass="w-15rem border-round-md" :src="img_url" :alt="state.img" preview @load="img_loading = false" />
-        <Skeleton v-show="img_loading" class="w-15rem h-8rem my-4 border-round-md" />
+      <div class="my-4" v-else>
+        <p class="my-auto mr-4 font-bold cursor-pointer text-red-500" @click="isImg = !isImg">Image Uploaded</p>
+        <div class="flex flex-row justify-content-start mt-2">
+          <Image v-show="!img_loading" class="" imageClass="w-15rem border-round-md" :src="img_url" :alt="state.img" preview @load="img_loading = false" />
+          <Skeleton v-show="img_loading" class="w-15rem h-8rem my-4 border-round-md" />
+        </div>
       </div>
 
       <!-- //* Event Detail Form -->
