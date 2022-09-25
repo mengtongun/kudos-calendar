@@ -1,78 +1,5 @@
 export const schema = {
     "models": {
-        "UserLogs": {
-            "name": "UserLogs",
-            "fields": {
-                "id": {
-                    "name": "id",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "UID": {
-                    "name": "UID",
-                    "isArray": false,
-                    "type": "ID",
-                    "isRequired": true,
-                    "attributes": []
-                },
-                "loginAt": {
-                    "name": "loginAt",
-                    "isArray": false,
-                    "type": "AWSTimestamp",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "logoutAt": {
-                    "name": "logoutAt",
-                    "isArray": false,
-                    "type": "AWSTimestamp",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                },
-                "updatedAt": {
-                    "name": "updatedAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
-                    "isRequired": false,
-                    "attributes": [],
-                    "isReadOnly": true
-                }
-            },
-            "syncable": true,
-            "pluralName": "UserLogs",
-            "attributes": [
-                {
-                    "type": "model",
-                    "properties": {}
-                },
-                {
-                    "type": "auth",
-                    "properties": {
-                        "rules": [
-                            {
-                                "allow": "private",
-                                "operations": [
-                                    "create",
-                                    "update",
-                                    "delete",
-                                    "read"
-                                ]
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
         "Events": {
             "name": "Events",
             "fields": {
@@ -97,13 +24,6 @@ export const schema = {
                     "isArray": false,
                     "type": "String",
                     "isRequired": true,
-                    "attributes": []
-                },
-                "description": {
-                    "name": "description",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
                     "attributes": []
                 },
                 "url": {
@@ -141,55 +61,6 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "editable": {
-                    "name": "editable",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "startEditable": {
-                    "name": "startEditable",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "durationEditable": {
-                    "name": "durationEditable",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "resourceEditable": {
-                    "name": "resourceEditable",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "display": {
-                    "name": "display",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "overlap": {
-                    "name": "overlap",
-                    "isArray": false,
-                    "type": "Boolean",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "constraint": {
-                    "name": "constraint",
-                    "isArray": false,
-                    "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
                 "backgroundColor": {
                     "name": "backgroundColor",
                     "isArray": false,
@@ -211,24 +82,17 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "extendedProps": {
-                    "name": "extendedProps",
+                "img": {
+                    "name": "img",
                     "isArray": false,
                     "type": "String",
                     "isRequired": false,
                     "attributes": []
                 },
-                "source": {
-                    "name": "source",
+                "description": {
+                    "name": "description",
                     "isArray": false,
                     "type": "String",
-                    "isRequired": false,
-                    "attributes": []
-                },
-                "createdAt": {
-                    "name": "createdAt",
-                    "isArray": false,
-                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 },
@@ -239,10 +103,10 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
-                "groupId": {
-                    "name": "groupId",
+                "createdAt": {
+                    "name": "createdAt",
                     "isArray": false,
-                    "type": "String",
+                    "type": "AWSDateTime",
                     "isRequired": false,
                     "attributes": []
                 }
@@ -287,5 +151,5 @@ export const schema = {
         }
     },
     "nonModels": {},
-    "version": "d93045f445969929bf2159eb26e91510"
+    "version": "31ca64cedf694753ed19bbce34e717cb"
 };

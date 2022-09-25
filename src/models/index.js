@@ -8,10 +8,9 @@ const StatusEnum = {
   "DELETED": "DELETED"
 };
 
-const { UserLogs, Events } = initSchema(schema);
+const { Events } = initSchema(schema);
 
 export {
-  UserLogs,
   Events,
   StatusEnum
 };

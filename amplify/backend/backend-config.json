@@ -57,5 +57,12 @@
         }
       }
     }
+  },
+  "storage": {
+    "s3kudoscalendar": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": []
+    }
   }
 }
