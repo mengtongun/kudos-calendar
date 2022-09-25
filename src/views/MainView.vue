@@ -8,9 +8,8 @@ import interactionPlugin from "@fullcalendar/interaction";
 // @ts-ignore
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
 // @ts-ignore
-
 import EventModalFormVue from "@/components/EventModalForm.vue";
-import { ref, h, onUpdated, onMounted } from "vue";
+import { ref, h, onUpdated, onMounted, computed } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
 import { useStore } from "vuex";
@@ -101,10 +100,10 @@ const handleEvents = (events: EventApi[]) => {
   currentEvents.value = events;
 };
 const setInitEvents = async () => {
-  is_fetching.value = true;
+  isFetching.value = true;
   const events = await store.dispatch("fetchEvents");
   calendarOptions.value.events = events;
-  is_fetching.value = false;
+  isFetching.value = false;
 };
 const onToggleWeekend = () => {
   calendarOptions.value.weekends = !calendarOptions.value.weekends;
@@ -126,16 +125,17 @@ const onEventInList = (event: EventApi) => {
   });
 };
 const logout = async () => {
-  is_loading.value = true;
+  isLoading.value = true;
   await Auth.signOut();
-  is_loading.value = false;
+  isLoading.value = false;
   window.location.reload();
 };
 
-// **** State ****
-const is_loading = ref<boolean>(false);
-const is_fetching = ref<boolean>(false);
+// **** STATE ****
+const isLoading = ref<boolean>(false);
+const isFetching = ref<boolean>(false);
 const currentEvents = ref<EventApi[]>([]);
+const username = computed(() => auth.user.attributes.name);
 const calendarOptions = ref<CalendarOptions>({
   plugins: [
     dayGridPlugin,
@@ -176,15 +176,11 @@ const calendarOptions = ref<CalendarOptions>({
 onMounted(async () => {
   await setInitEvents();
 });
-
-onUpdated(() => {
-  console.log("event", store.state.events);
-});
 </script>
 
 <template>
   <div class="kudos-app flex justify-content-between">
-    <div class="m-auto" v-if="is_fetching">
+    <div class="m-auto" v-if="isFetching">
       <Image src="logo.png" alt="logo" width="200" heigh="200" class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
       <ProgressBar mode="indeterminate" style="height: 0.5em" />
     </div>
@@ -213,9 +209,9 @@ onUpdated(() => {
             <img src="logo.png" alt="logo" width="145" height="145" />
           </div>
           <div>
-            <h3>{{ auth.user.attributes.name }}</h3>
+            <h3>{{ username }}</h3>
             <p class="font-italic">Calendar for Kudos 🚀</p>
-            <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger" @click="logout" :loading="is_loading" />
+            <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger" @click="logout" :loading="isLoading" />
           </div>
         </div>
 
