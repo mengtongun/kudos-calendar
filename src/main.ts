@@ -18,6 +18,7 @@ import Editor from "primevue/editor";
 import ProgressBar from "primevue/progressbar";
 import FileUpload from "primevue/fileupload";
 import Skeleton from "primevue/skeleton";
+import Card from "primevue/card";
 import FullCalendar from "@fullcalendar/vue3/dist/FullCalendar";
 
 import "primevue/resources/themes/saga-blue/theme.css"; // theme
@@ -49,6 +50,7 @@ app.component("Editor", Editor);
 app.component("ProgressBar", ProgressBar);
 app.component("FileUpload", FileUpload);
 app.component("Skeleton", Skeleton);
+app.component("Card", Card);
 
 app.component("FullCalendar", FullCalendar);
 
