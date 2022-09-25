@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { EventApiData } from "@/types";
 import { inject, onBeforeMount, onUpdated, reactive, Ref, ref } from "vue";
-import { useStore } from "vuex";
-import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR } from "@/constants";
+import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
 import { CalendarApi, DateSelectArg } from "@fullcalendar/common";
 import { useToast } from "primevue/usetoast";
-import { createEventId } from "@/utils/event-utils";
-const store = useStore();
+import { Storage } from "@aws-amplify/storage";
+
+// **** SERVICES ****
 const toast = useToast();
 
+// **** STATE ****
+const eventRef = ref<EventApiData>();
+const dialogRef = inject("dialogRef") as Ref;
+const isImg = ref<boolean>(false);
+const img_loading = ref<boolean>(false);
+const img_url = ref<string>("");
 const state = reactive({
   id: "",
   title: "",
@@ -19,51 +25,23 @@ const state = reactive({
   backgroundColor: "#3f51b5",
   borderColor: "#3f51b5",
   textColor: "#ffffff",
-  extendedProps: {},
+  img: "",
 });
 
-const is_loading = ref<boolean>(false);
-const dialogRef = inject("dialogRef") as Ref;
-onBeforeMount(() => {
-  const event = dialogRef.value.data.event as EventApiData & DateSelectArg;
-  if (event) {
-    state.id = event.id;
-    state.title = event.title || "";
-    state.start = event.start || new Date();
-    state.end = event.end || new Date();
-    state.allDay = event.allDay;
-    state.description = event.description;
-    state.backgroundColor = event.backgroundColor || FORM_DEFAULT_BG_COLOR;
-    state.borderColor = event.borderColor || FORM_DEFAULT_BORDER_COLOR;
-    state.textColor = event.textColor || FORM_DEFAULT_TEXT_COLOR;
-    state.extendedProps = event.extendedProps;
-  }
-});
-
-onUpdated(() => {
-  console.log("state", state);
-});
+// **** METHODS ****
 const onAddEvent = () => {
   console.log("state", state);
-  const calendarApi = dialogRef.value.data.calendarApi as CalendarApi;
-  toast.add({ severity: "success", summary: "Success", detail: "Event Added", life: 3000 });
-  if (state.id) {
-    calendarApi.addEvent({
-      id: state.id,
-      title: state.title,
-      start: state.start,
-      end: state.end,
-      allDay: state.allDay,
-      description: state.description,
-      backgroundColor: state.backgroundColor,
-      borderColor: state.borderColor,
-      textColor: state.textColor,
-      extendedProps: state.extendedProps,
-    });
+  if (!state.title) {
+    toast.add({ ...TOAST_ERROR_CONFIG, detail: "Title is required" });
     return;
   }
-  calendarApi.addEvent({
-    id: createEventId(),
+  if (!state.start || !state.end) {
+    toast.add({ ...TOAST_ERROR_CONFIG, detail: "Start and End date are required" });
+    return;
+  }
+  const calendarApi = dialogRef.value.data.calendarApi as CalendarApi;
+  const event = {
+    id: state.id || "",
     title: state.title,
     start: state.start,
     end: state.end,
@@ -72,56 +50,59 @@ const onAddEvent = () => {
     backgroundColor: state.backgroundColor,
     borderColor: state.borderColor,
     textColor: state.textColor,
-    extendedProps: state.extendedProps,
-  });
+    img: state.img,
+  };
+  if (state.id) {
+    eventRef.value?.remove();
+  }
+  calendarApi.addEvent(event);
   dialogRef.value.close();
 };
-const onAddEvent1 = () => {
-  if (!state.title) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Title is required",
-      life: 3000,
+
+const onUploader = async (event: any) => {
+  console.log(event);
+  const file = event.files[0] as File;
+  const res = await Storage.put(file.name, file, {
+    level: "private",
+    contentType: file.type,
+  });
+
+  state.img = res.key;
+  toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Image uploaded" });
+  if (state.img) {
+    img_loading.value = true;
+    Storage.get(state.img, { level: "private" }).then((res) => {
+      img_url.value = res;
     });
-    return;
   }
-  if (!state.start) {
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Start date is required",
-      life: 3000,
-    });
-    return;
-  }
-  is_loading.value = true;
-  console.log("id event", state.id);
-  store
-    .dispatch(`${!state.id ? "addEvent" : "updateEvent"}`, state)
-    .then(() => {
-      toast.removeAllGroups();
-      toast.add({
-        severity: "success",
-        summary: "Success",
-        detail: "Event added",
-        life: 3000,
-      });
-    })
-    .catch((err) => {
-      toast.removeAllGroups();
-      toast.add({
-        severity: "error",
-        summary: "Error",
-        detail: err.message,
-        life: 3000,
-      });
-    })
-    .finally(() => {
-      is_loading.value = false;
-      dialogRef.value.close();
-    });
+  return file;
 };
+
+// **** HOOKS ****
+onBeforeMount(() => {
+  const event = dialogRef.value.data.event as EventApiData & DateSelectArg;
+  eventRef.value = event;
+  state.id = event.id;
+  state.title = event.title || "";
+  state.start = event.start || new Date();
+  state.end = event.end || new Date();
+  state.allDay = event.allDay;
+  state.description = event.extendedProps?.description || "";
+  state.backgroundColor = event.backgroundColor || FORM_DEFAULT_BG_COLOR;
+  state.borderColor = event.borderColor || FORM_DEFAULT_BORDER_COLOR;
+  state.textColor = event.textColor || FORM_DEFAULT_TEXT_COLOR;
+  state.img = event.extendedProps?.img || "";
+  if (state.img) {
+    img_loading.value = true;
+    Storage.get(state.img, { level: "private" }).then((res) => {
+      img_url.value = res;
+    });
+  }
+});
+
+onUpdated(() => {
+  console.log("state", state);
+});
 </script>
 
 <template>
@@ -137,15 +118,13 @@ const onAddEvent1 = () => {
         </div>
         <!-- Big Save Button -->
         <div>
-          <Button icon="pi pi-save" :loading="is_loading" label="Save" class="p-button-lg" @click="onAddEvent" />
+          <Button icon="pi pi-save" label="Save" class="p-button-lg" @click="onAddEvent" />
         </div>
       </div>
       <!-- //* DateTime Setting -->
-      <div class="block w-full my-4">
-        <div class="inline-block w-2">
-          <p class="inline-block">All Days</p>
-          <InputSwitch class="inline-block vertical-align-middle ml-4" v-model="state.allDay" />
-        </div>
+      <div class="flex flex-row justify-content-start my-4">
+        <p class="my-auto mr-4 font-bold">All Days</p>
+        <InputSwitch v-model="state.allDay" />
       </div>
       <div class="flex flex-wrap justify-content-start card-container blue-container gap-3">
         <!-- //* DateStart -->
@@ -166,6 +145,20 @@ const onAddEvent1 = () => {
           <Calendar v-model="state.end" timeOnly hourFormat="12" class="border-round-lg" />
         </div>
       </div>
+
+      <!-- //* Event Image Upload -->
+      <div v-if="!state.img" class="flex flex-row justify-content-start mt-4">
+        <input type="checkbox" :checked="isImg" @change="isImg = !isImg" />
+        <p class="my-auto mr-4 font-bold cursor-pointer" @click="isImg = !isImg">Event Image</p>
+        <FileUpload v-if="isImg" name="img[]" :multiple="false" accept="image/*" :maxFileSize="5000000" :customUpload="true" @uploader="onUploader" />
+      </div>
+      <!-- //* Image Display -->
+      <div v-else class="flex flex-row justify-content-start">
+        <!-- click image close preview -->
+        <Image v-show="!img_loading" class="my-4" imageClass="w-15rem border-round-md" :src="img_url" :alt="state.img" preview @load="img_loading = false" />
+        <Skeleton v-show="img_loading" class="w-15rem h-8rem my-4 border-round-md" />
+      </div>
+
       <!-- //* Event Detail Form -->
       <div class="flex flex-wrap justify-content-start gap-3 mt-4">
         <!-- //* Editor Description -->

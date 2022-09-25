@@ -33,6 +33,9 @@ import Slider from "primevue/slider";
 import Rating from "primevue/rating";
 import Textarea from "primevue/textarea";
 import Editor from "primevue/editor";
+import ProgressBar from "primevue/progressbar";
+import FileUpload from "primevue/fileupload";
+import Skeleton from "primevue/skeleton";
 import FullCalendar from "@fullcalendar/vue3/dist/FullCalendar";
 
 import "primevue/resources/themes/saga-blue/theme.css"; // theme
@@ -79,6 +82,9 @@ app.component("Slider", Slider);
 app.component("Rating", Rating);
 app.component("Textarea", Textarea);
 app.component("Editor", Editor);
+app.component("ProgressBar", ProgressBar);
+app.component("FileUpload", FileUpload);
+app.component("Skeleton", Skeleton);
 
 app.component("FullCalendar", FullCalendar);
 

@@ -19,55 +19,30 @@ export default createStore({
 	getters: {
 		getEvents: (state) => state.events,
 	},
-	mutations: {
-		ADD_EVENT(state, event) {
-			state.events.push(event);
-		},
-		DEL_EVENT(state, event) {
-			state.events = state.events.filter((e) => e.id !== event.id);
-		},
-		UPDATE_EVENT(state, event) {
-			state.events = state.events.map((e) => {
-				if (e.id === event.id) {
-					return event;
-				} else {
-					return e;
-				}
-			});
-		},
-	},
+	mutations: {},
 	actions: {
 		async fetchEvents({ commit, state }) {
 			const events = await DataStore.query(Events);
 			state.events = events.filter((e) => e.status === StatusEnum.ACTIVE);
+			return events;
 			console.log("events", events);
 		},
 		addEvent({ commit }, event: EventApiData) {
-			commit("ADD_EVENT", event);
 			const data = {
 				status: StatusEnum.ACTIVE,
 				title: event.title,
-				description: event.description || "",
 				url: "",
 				start: event.start?.toISOString() || new Date().toISOString(), // will delete after finished other part
 				end: event.end?.toISOString() || new Date().toISOString(),
 				allDay: event.allDay,
-				classNames: "", // todo new feature on UI
-				editable: true,
-				startEditable: true,
-				durationEditable: true,
-				resourceEditable: true,
-				display: "",
-				overlap: true,
-				constraint: "",
+				classNames: event.classNames.join(","), // todo new feature on UI
+				constraint: event.constraint?.toString() || "",
 				backgroundColor: event.backgroundColor || FORM_DEFAULT_BG_COLOR,
 				borderColor: event.borderColor || FORM_DEFAULT_BORDER_COLOR,
 				textColor: event.textColor || FORM_DEFAULT_TEXT_COLOR,
-				extendedProps: "",
-				source: "",
-				groupId: event.groupId || "",
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+				...event.extendedProps,
 			};
 			return new Promise((resolve, reject) => {
 				DataStore.save(new Events(data))
@@ -81,7 +56,6 @@ export default createStore({
 			});
 		},
 		delEvent({ commit }, event) {
-			commit("DEL_EVENT", event);
 			return new Promise((resolve, reject) => {
 				DataStore.delete(Events, event.id)
 					.then((res) => {
@@ -100,27 +74,15 @@ export default createStore({
 			const data = {
 				status: StatusEnum.ACTIVE,
 				title: event.title,
-				description: event.description || "",
-				url: "",
 				start: event.start?.toISOString() || new Date().toISOString(), // will delete after finished other part
 				end: event.end?.toISOString() || new Date().toISOString(),
 				allDay: event.allDay,
-				classNames: "", // todo new feature on UI
-				editable: true,
-				startEditable: true,
-				durationEditable: true,
-				resourceEditable: true,
-				display: "",
-				overlap: true,
-				constraint: "",
+				classNames: event.classNames.join(","), // todo new feature on UI
 				backgroundColor: event.backgroundColor || FORM_DEFAULT_BG_COLOR,
 				borderColor: event.borderColor || FORM_DEFAULT_BORDER_COLOR,
 				textColor: event.textColor || FORM_DEFAULT_TEXT_COLOR,
-				extendedProps: "",
-				source: "",
-				groupId: event.groupId || "",
-				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
+				...event.extendedProps,
 			};
 			return new Promise((resolve, reject) => {
 				DataStore.save(

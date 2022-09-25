@@ -1,25 +1,29 @@
-<script setup lang="ts">
-import { Ref } from "@vue/runtime-core";
-import { inject, ref, onBeforeMount, defineExpose } from "vue";
-import { EventApi } from "@fullcalendar/vue3";
+<script  setup lang="ts">
+import { inject, onMounted, ref, Ref } from "vue";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
+import { Storage } from "@aws-amplify/storage";
 
-// State
-const event = ref<EventApi | undefined>(undefined);
-
-// Service
+const dialogRef = inject("dialogRef") as Ref;
+const event = dialogRef.value.data.event;
 const auth = useAuthenticator();
-onBeforeMount(() => {
-  const dialogRef = inject("dialogRef") as Ref;
-  event.value = dialogRef.value.data.event;
+const img = ref<string>("");
+const img_loading = ref<boolean>(false);
+onMounted(() => {
+  if (event.extendedProps?.img) {
+    img_loading.value = true;
+    Storage.get(event.extendedProps.img, { level: "private" }).then((res) => {
+      img.value = res;
+    });
+  }
 });
 </script>
 
 <template>
   <Card style="width: 30rem">
-    <template v-if="event.extendedProps?.image" #header>
-      <div class="flex flex-row item-center">
-        <Image class="mx-auto w-25rem" :src="event.extendedProps?.image" alt="event_img" preview />
+    <template #header>
+      <div v-if="event.extendedProps?.img" class="flex flex-row item-center">
+        <Image v-show="!img_loading" class="mx-auto border-round-md px-1" imagClass="w-25rem border-round-md" :src="img" :alt="event.extendedProps.img" preview @load="img_loading = false" />
+        <Skeleton v-show="img_loading" class="mx-auto w-25rem h-10rem border-round-md" />
       </div>
     </template>
     <template #title>
@@ -41,23 +45,24 @@ onBeforeMount(() => {
       <!-- Date -->
       <div class="flex flex-row items-center">
         <i class="pi pi-calendar my-auto" style="font-size: 1.5rem" />
-        <p class="ml-2">{{ event.startStr }} - {{ event.endStr }}</p>
+        <p class="ml-2">{{ event.startStr.split("T")[0] }} to {{ event.endStr.split("T")[0] }}</p>
       </div>
       <!-- Time -->
-      <div class="flex flex-row items-center">
+      <div class="flex flex-row items-center" v-if="!event.allDay">
         <i class="pi pi-clock my-auto" style="font-size: 1.5rem" />
-        <p class="ml-2">{{ event.startStr }} - {{ event.endStr }}</p>
+        <p class="ml-2">{{ event.start?.toLocaleTimeString() }} <b>to</b> {{ event.end?.toLocaleTimeString() }}</p>
       </div>
-      <!-- Location -->
-      <div class="flex flex-row items-center">
+      <!-- Location //TODO -->
+      <!-- <div class="flex flex-row items-center">
         <i class="pi pi-map-marker my-auto" style="font-size: 1.5rem" />
         <p class="ml-2">Location</p>
-      </div>
+      </div> -->
       <!-- Description -->
       <div class="flex flex-row items-center">
         <i class="pi pi-info-circle my-auto" style="font-size: 1.5rem" />
         <p class="ml-2">Description</p>
       </div>
+      <div v-html="event.extendedProps.description"></div>
     </template>
   </Card>
 </template>
