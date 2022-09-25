@@ -1,5 +1,5 @@
 <script  setup lang="ts">
-import { inject, onMounted, ref, Ref } from "vue";
+import { computed, inject, onMounted, ref, Ref } from "vue";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
 import { Storage } from "@aws-amplify/storage";
 
@@ -7,10 +7,20 @@ const dialogRef = inject("dialogRef") as Ref;
 const event = dialogRef.value.data.event;
 const auth = useAuthenticator();
 const img = ref<string>("");
-const img_loading = ref<boolean>(false);
+const imgLoading = ref<boolean>(false);
+
+// **** COMPUTED ****
+const username = computed(() => auth.user.attributes.name);
+const startLocalTime = computed(() => event.start.toLocaleTimeString());
+const endLocalTime = computed(() => event.end.toLocaleTimeString());
+const startLocalDate = computed(() => event.startStr.split("T")[0]);
+const endLocalDate = computed(() => event.endStr.split("T")[0]);
+const description = computed(() => event.extendedProps.description);
+const imgKey = computed(() => event.extendedProps.img);
+
 onMounted(() => {
   if (event.extendedProps?.img) {
-    img_loading.value = true;
+    imgLoading.value = true;
     Storage.get(event.extendedProps.img, { level: "private" }).then((res) => {
       img.value = res;
     });
@@ -21,9 +31,9 @@ onMounted(() => {
 <template>
   <Card style="width: 30rem">
     <template #header>
-      <div v-if="event.extendedProps?.img" class="flex flex-row item-center">
-        <Image v-show="!img_loading" class="mx-auto border-round-md px-1" imagClass="w-25rem border-round-md" :src="img" :alt="event.extendedProps.img" preview @load="img_loading = false" />
-        <Skeleton v-show="img_loading" class="mx-auto w-28rem h-10rem border-round-md" />
+      <div v-if="imgKey" class="flex flex-row item-center">
+        <Image v-show="!imgLoading" class="mx-auto border-round-md px-1" imagClass="w-25rem border-round-md" :src="img" :alt="imgKey" preview @load="imgLoading = false" />
+        <Skeleton v-show="imgLoading" class="mx-auto w-28rem h-10rem border-round-md" />
       </div>
     </template>
     <template #title>
@@ -37,7 +47,7 @@ onMounted(() => {
       <div class="flex flex-row item-center">
         <i class="pi pi-user my-auto" />
         <p class="ml-2">
-          {{ auth.user.attributes.name }}
+          {{ username }}
         </p>
       </div>
     </template>
@@ -45,12 +55,12 @@ onMounted(() => {
       <!-- Date -->
       <div class="flex flex-row items-center">
         <i class="pi pi-calendar my-auto" style="font-size: 1.5rem" />
-        <p class="ml-2">{{ event.startStr.split("T")[0] }} to {{ event.endStr.split("T")[0] }}</p>
+        <p class="ml-2">{{ startLocalDate }} to {{ endLocalDate }}</p>
       </div>
       <!-- Time -->
       <div class="flex flex-row items-center" v-if="!event.allDay">
         <i class="pi pi-clock my-auto" style="font-size: 1.5rem" />
-        <p class="ml-2">{{ event.start?.toLocaleTimeString() }} <b>to</b> {{ event.end?.toLocaleTimeString() }}</p>
+        <p class="ml-2">{{ startLocalTime }} <b>to</b> {{ endLocalTime }}</p>
       </div>
       <!-- Location //TODO -->
       <!-- <div class="flex flex-row items-center">
@@ -62,8 +72,8 @@ onMounted(() => {
         <i class="pi pi-info-circle my-auto" style="font-size: 1.5rem" />
         <p class="ml-2">Description</p>
       </div>
-      <div v-if="event.extendedProps.description">
-        <div class="m-2" v-html="event.extendedProps.description"></div>
+      <div v-if="description">
+        <div class="m-2" v-html="description"></div>
       </div>
     </template>
   </Card>

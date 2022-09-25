@@ -1,17 +1,18 @@
 <script setup lang='ts'>
 import "@fullcalendar/core/vdom"; // solve problem with Vite
 import { CalendarOptions, EventApi, DateSelectArg, EventClickArg } from "@fullcalendar/vue3";
+import Button from "primevue/button";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 // @ts-ignore
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
 // @ts-ignore
+
 import EventModalFormVue from "@/components/EventModalForm.vue";
-import { ref, h, onBeforeMount, onUpdated } from "vue";
+import { ref, h, onUpdated, onMounted } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
-import Button from "primevue/button";
 import { useStore } from "vuex";
 import { Auth } from "aws-amplify";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
@@ -82,7 +83,7 @@ const handleEventClick = (clickInfo: EventClickArg) => {
           }),
           h(Button, {
             label: "Delete",
-            icon: "pi pi-trash",
+            icon: "pi pi-calendar-times",
             class: "p-button-danger",
             onClick: () => {
               clickInfo.event.remove();
@@ -106,7 +107,7 @@ const setInitEvents = async () => {
   is_fetching.value = false;
 };
 const onToggleWeekend = () => {
-  calendarOptions.value.weekends = !calendarOptions.value.weekends; // update a property
+  calendarOptions.value.weekends = !calendarOptions.value.weekends;
 };
 const onEventInList = (event: EventApi) => {
   dialog.open(EventModalDetailVue, {
@@ -124,6 +125,13 @@ const onEventInList = (event: EventApi) => {
     },
   });
 };
+const logout = async () => {
+  is_loading.value = true;
+  await Auth.signOut();
+  is_loading.value = false;
+  window.location.reload();
+};
+
 // **** State ****
 const is_loading = ref<boolean>(false);
 const is_fetching = ref<boolean>(false);
@@ -164,15 +172,9 @@ const calendarOptions = ref<CalendarOptions>({
   },
 });
 
-const logout = async () => {
-  is_loading.value = true;
-  await Auth.signOut();
-  is_loading.value = false;
-  window.location.reload();
-};
 // **** HOOKS ****
-onBeforeMount(() => {
-  setInitEvents();
+onMounted(async () => {
+  await setInitEvents();
 });
 
 onUpdated(() => {
@@ -192,9 +194,15 @@ onUpdated(() => {
       <DynamicDialog />
       <FullCalendar class="p-3" :options="calendarOptions">
         <template #eventContent="arg">
-          <!-- // TODO: Phase 2 -->
-          <b>{{ arg.event.start.toLocaleTimeString() }} {{ arg.event.allDay ? "" : "- " }} </b>
-          <i>{{ arg.event.title }}</i>
+          <template v-if="arg.timeText">
+            <span :style="{ border: `1px solid ${arg.borderColor}` }">
+              <b>{{ arg.event.start.toLocaleTimeString() }} {{ arg.timeText ? "" : "- " }} </b>
+              <i>{{ arg.event.title }}</i>
+            </span>
+          </template>
+          <template v-else>
+            <i>{{ arg.event.title }}</i>
+          </template>
         </template>
       </FullCalendar>
 
@@ -250,6 +258,7 @@ onUpdated(() => {
   max-width: 200rem;
   min-width: 100rem;
 }
+
 .fc {
   /* the calendar root */
   max-width: 170rem;
@@ -258,6 +267,7 @@ onUpdated(() => {
   min-height: 40rem;
   max-height: 56rem;
 }
+
 .kudos-sidebar {
   flex: 1;
   padding: 1rem;
@@ -270,9 +280,7 @@ onUpdated(() => {
 .p-image-toolbar {
   z-index: 1000;
 }
-.p-dialog-header {
-  border-bottom: 1px solid #ffffff;
-}
+
 .kudos-event-time {
   font-size: 0.8em;
   padding: 0.2em 0.5em;

@@ -113,7 +113,7 @@ onUpdated(() => {
         </div>
         <!-- Big Save Button -->
         <div>
-          <Button icon="pi pi-save" label="Save" class="p-button-lg" @click="onAddEvent" />
+          <Button icon="pi pi-calendar-plus" label="Save" class="p-button-lg" @click="onAddEvent" />
         </div>
       </div>
       <!-- //* DateTime Setting -->
