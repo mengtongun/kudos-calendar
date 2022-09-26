@@ -10,9 +10,10 @@ Participate AWS Amplify Hackathon
 <br/>
 Demo Account:
 <br/>
+```
 Email: demo@user.com
-<br/>
 password: 12345678
+```
 
 ## Project setup
 ```
@@ -21,7 +22,7 @@ yarn install
 
 ## AWS Set Up (Already setup amplify studio only)
 ```
-amplify pull --appId <appId> --envName staging
+amplify pull --appId <appId> --envName <envName>
 ```
 ### Compiles and hot-reloads for development
 ```
