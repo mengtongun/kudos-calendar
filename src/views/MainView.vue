@@ -181,7 +181,7 @@ onMounted(async () => {
 
 <template>
   <div class="kudos-app flex justify-content-between">
-    <div class="m-auto" v-if="isFetching">
+    <div class="m-auto" v-if="isFetching" style="min-width: 10rem">
       <Image src="logo.png" alt="logo" width="200" heigh="200" class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
       <ProgressBar mode="indeterminate" style="height: 0.5em" />
     </div>
@@ -203,25 +203,23 @@ onMounted(async () => {
         </template>
       </FullCalendar>
 
-      <div class="kudos-sidebar border-left-1 border-cyan-100">
+      <div class="kudos-sidebar border-left-1 border-cyan-100 overflow-y-auto mb-2">
         <!-- //* Profile View -->
         <div class="flex flex-row justify-content-evenly">
-          <div>
-            <img src="logo.png" alt="logo" width="145" height="145" />
-          </div>
+          <img src="logo.png" alt="logo" class="object-contain" style="min-width: 50px" width="145" height="145" />
           <div>
             <h3>{{ username }}</h3>
-            <p class="font-italic">Calendar for Kudos 🚀</p>
+            <p class="font-italic white-space-nowrap overflow-hidden text-overflow-ellipsis">Calendar for Kudos 🚀</p>
             <Button label="Logout" icon="pi pi-sign-out" class="p-button-danger" @click="logout" :loading="isLoading" />
           </div>
         </div>
 
-        <div class="px-4 pt-4">
+        <div class="px-4 pt-4 md:px-1 md:pt-1 text-sm">
           <h3>Instructions</h3>
           <ul class="m-0 py-0 px-4">
-            <li class="my-2 mx-0 p-0">Select dates and you will be prompted to create a new event</li>
-            <li class="my-2 mx-0 p-0">Drag, drop, and resize events</li>
-            <li class="my-2 mx-0 p-0">Click an event to delete it</li>
+            <li class="my-2 mx-0 md:my-1 p-0">Select dates and you will be prompted to create a new event</li>
+            <li class="my-2 mx-0 md:my-1 p-0">Drag, drop, and resize events</li>
+            <li class="my-2 mx-0 md:my-1 p-0">Click an event to delete it</li>
           </ul>
         </div>
         <div class="px-4 flex flex-row justify-content-start align-item-center">
@@ -230,7 +228,7 @@ onMounted(async () => {
         </div>
         <div class="px-4 pb-4">
           <h3>All Events ({{ currentEvents.length }})</h3>
-          <ul class="m-0 py-0 px-4 h-26rem overflow-y-auto">
+          <ul class="m-0 py-0 px-4">
             <li v-for="event in currentEvents" :key="event.id">
               <b class="mr-1">{{ event.startStr }}</b>
               <i @click="onEventInList(event)" class="cursor-pointer">{{ event.title }}</i>
@@ -244,7 +242,6 @@ onMounted(async () => {
 
 <style lang='css'  >
 .kudos-app {
-  display: flex;
   min-height: 60rem;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 14px;
@@ -252,25 +249,27 @@ onMounted(async () => {
   padding: 0;
   background-color: #102832;
   border: 2px solid rgb(13, 84, 114);
-  min-width: 50rem;
+  min-width: 30rem;
+  max-height: calc(100vh - 1rem);
+  min-height: 5rem;
 }
 
 .fc {
   /* the calendar root */
   /* max-width: 170rem; */
   width: 100%;
-  min-width: 60rem;
+  min-width: 20rem;
   margin: 0 auto;
-  min-height: 40rem;
   max-height: calc(100vh - 1rem);
+  min-height: 5rem;
 }
 
 .kudos-sidebar {
-  flex: 1;
   padding: 1rem;
-  min-width: 20rem;
+  min-width: 15rem;
   max-width: 30rem;
-  min-height: 56rem;
+  max-height: calc(100vh - 1rem);
+  min-height: 5rem;
 }
 
 .p-image-toolbar {

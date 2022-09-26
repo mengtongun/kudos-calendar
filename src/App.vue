@@ -23,4 +23,7 @@ body {
   margin: 0;
   background: #102832;
 }
+.min-w-10rem {
+  min-width: 10rem;
+}
 </style>
