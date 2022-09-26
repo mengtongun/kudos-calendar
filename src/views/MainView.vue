@@ -144,6 +144,10 @@ const updateEvent = async (eventApi: EventApi) => {
   toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
 };
 
+const formatDate = (date: Date) => {
+  return `${date.toLocaleTimeString()} - ${date.toISOString().split("T")[0]}`;
+};
+
 // **** STATE ****
 const isLoading = ref<boolean>(false);
 const isFetching = ref<boolean>(false);
@@ -235,14 +239,14 @@ onMounted(async () => {
           </ul>
         </div>
         <div class="px-4 flex flex-row justify-content-start align-item-center">
-          <p class="">Show Weekend</p>
+          <p @click="onToggleWeekend" class="cursor-pointer">Show Weekend</p>
           <input type="checkbox" :checked="calendarOptions.weekends" @change="onToggleWeekend" />
         </div>
         <div class="px-4 pb-4">
           <h3>All Events ({{ currentEvents.length }})</h3>
           <ul class="m-0 py-0 px-4">
             <li v-for="event in currentEvents" :key="event.id">
-              <b class="mr-1">{{ event.startStr }}</b>
+              <b class="mr-1">{{ event.allDay ? event.startStr : formatDate(event.start) }}</b>
               <i @click="onEventInList(event)" class="cursor-pointer">{{ event.title }}</i>
             </li>
           </ul>
