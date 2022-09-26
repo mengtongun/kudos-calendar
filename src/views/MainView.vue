@@ -229,9 +229,9 @@ onMounted(async () => {
         <div class="px-4 pt-4 md:px-1 md:pt-1 text-sm">
           <h3>Instructions</h3>
           <ul class="m-0 py-0 px-4">
-            <li class="my-2 mx-0 md:my-1 p-0">Select dates and you will be prompted to create a new event</li>
+            <li class="my-2 mx-0 md:my-1 p-0">Select dates and it will popup dialog form to create a new event</li>
             <li class="my-2 mx-0 md:my-1 p-0">Drag, drop, and resize events</li>
-            <li class="my-2 mx-0 md:my-1 p-0">Click an event to delete it</li>
+            <li class="my-2 mx-0 md:my-1 p-0">Click on event to view it</li>
           </ul>
         </div>
         <div class="px-4 flex flex-row justify-content-start align-item-center">
