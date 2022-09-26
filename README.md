@@ -7,6 +7,12 @@
 
 ### Objective
 Participate AWS Amplify Hackathon
+<br/>
+Demo Account:
+<br/>
+Email: demo@user.com
+<br/>
+password: 12345678
 
 ## Project setup
 ```
