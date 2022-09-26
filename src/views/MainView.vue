@@ -268,6 +268,7 @@ onMounted(async () => {
   min-width: 30rem;
   max-height: calc(100vh - 1rem);
   min-height: 5rem;
+  color: white;
 }
 
 .fc {
