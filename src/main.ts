@@ -19,7 +19,7 @@ import Skeleton from "primevue/skeleton";
 import Card from "primevue/card";
 import FullCalendar from "@fullcalendar/vue3/dist/FullCalendar";
 
-import "primevue/resources/themes/saga-blue/theme.css"; // theme
+// import "primevue/resources/themes/saga-blue/theme.css"; // theme
 import "primevue/resources/themes/vela-blue/theme.css"; // theme
 import "primevue/resources/primevue.min.css"; // core css
 import "primeicons/primeicons.css"; // icons
