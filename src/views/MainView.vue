@@ -28,6 +28,7 @@ const handleDateSelect = (selectInfo: DateSelectArg) => {
   dialog.open(EventModalFormVue, {
     props: {
       header: "Edit Event",
+      style: "min-width: 20rem",
       closeOnEscape: true,
       modal: true,
       closable: true,
@@ -47,7 +48,7 @@ const handleEventClick = (clickInfo: EventClickArg) => {
   const viewDialogRef = dialog.open(EventModalDetailVue, {
     props: {
       header: "Event Details",
-      style: "width: 30rem",
+      style: "min-width: 20rem",
       footer: "border-bottom-left-radius: 1.5rem; border-bottom-right-radius: 1.5rem;",
       contentClass: "p-0",
       closable: true,
@@ -112,7 +113,7 @@ const onEventInList = (event: EventApi) => {
   dialog.open(EventModalDetailVue, {
     props: {
       header: "Event Details",
-      style: "width: 30rem",
+      style: "min-width: 20rem",
       contentClass: "p-0",
       closable: true,
       draggable: true,
@@ -251,17 +252,17 @@ onMounted(async () => {
   padding: 0;
   background-color: #102832;
   border: 2px solid rgb(13, 84, 114);
-  max-width: 200rem;
-  min-width: 100rem;
+  min-width: 50rem;
 }
 
 .fc {
   /* the calendar root */
-  max-width: 170rem;
-  min-width: 80rem;
+  /* max-width: 170rem; */
+  width: 100%;
+  min-width: 60rem;
   margin: 0 auto;
   min-height: 40rem;
-  max-height: 56rem;
+  max-height: calc(100vh - 1rem);
 }
 
 .kudos-sidebar {
@@ -270,7 +271,6 @@ onMounted(async () => {
   min-width: 20rem;
   max-width: 30rem;
   min-height: 56rem;
-  max-height: 100vw;
 }
 
 .p-image-toolbar {

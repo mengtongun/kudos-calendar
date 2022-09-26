@@ -83,7 +83,7 @@ export default {
   background-color: #5271ff;
   color: #fff;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem !important;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 500;
@@ -99,7 +99,7 @@ export default {
   background-color: transparent;
   color: #5271ff;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem !important;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 500;
@@ -112,7 +112,7 @@ export default {
 }
 .amplify-input {
   border: 1px solid #5271ff;
-  border-radius: 0.5rem;
+  border-radius: 0.5rem !important;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   font-weight: 500;

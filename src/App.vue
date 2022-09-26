@@ -21,5 +21,6 @@ Amplify.configure(awsmobile);
 }
 body {
   margin: 0;
+  background: #102832;
 }
 </style>

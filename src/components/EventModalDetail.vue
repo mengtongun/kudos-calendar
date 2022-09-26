@@ -29,10 +29,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card style="width: 30rem">
+  <Card style="min-width: 20rem">
     <template #header>
       <div v-if="imgKey" class="flex flex-row item-center">
-        <Image v-show="!imgLoading" class="mx-auto border-round-md px-1" imagClass="w-25rem border-round-md" :src="img" :alt="imgKey" preview @load="imgLoading = false" />
+        <Image v-show="!imgLoading" class="mx-auto border-round-md px-1" imagClass="w-full border-round-md" :src="img" :alt="imgKey" preview @load="imgLoading = false" />
         <Skeleton v-show="imgLoading" class="mx-auto w-28rem h-10rem border-round-md" />
       </div>
     </template>
