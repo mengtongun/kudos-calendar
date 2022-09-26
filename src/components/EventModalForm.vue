@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { EventApiData } from "@/types";
-import { inject, onBeforeMount, onUpdated, reactive, Ref, ref } from "vue";
+import { inject, onBeforeMount, reactive, Ref, ref } from "vue";
 import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
-import { CalendarApi, DateSelectArg } from "@fullcalendar/common";
+import { CalendarApi, DateSelectArg, EventApi } from "@fullcalendar/common";
 import { useToast } from "primevue/usetoast";
 import { Storage } from "@aws-amplify/storage";
 
@@ -10,7 +9,7 @@ import { Storage } from "@aws-amplify/storage";
 const toast = useToast();
 
 // **** STATE ****
-const eventRef = ref<EventApiData>();
+const eventRef = ref<EventApi>();
 const dialogRef = inject("dialogRef") as Ref;
 const isImg = ref<boolean>(false);
 const img_loading = ref<boolean>(false);
@@ -55,7 +54,6 @@ const onAddEvent = () => {
 };
 /* eslint-disable */
 const onUploader = async (event: any) => {
-  console.log(event);
   const file = event.files[0] as File;
   const res = await Storage.put(file.name, file, {
     level: "private",
@@ -75,7 +73,7 @@ const onUploader = async (event: any) => {
 
 // **** HOOKS ****
 onBeforeMount(() => {
-  const event = dialogRef.value.data.event as EventApiData & DateSelectArg;
+  const event = dialogRef.value.data.event as EventApi & DateSelectArg;
   eventRef.value = event;
   state.id = event.id;
   state.title = event.title || "";
@@ -93,10 +91,6 @@ onBeforeMount(() => {
       img_url.value = res;
     });
   }
-});
-
-onUpdated(() => {
-  console.log("state", state);
 });
 </script>
 
