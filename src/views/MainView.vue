@@ -1,5 +1,5 @@
 <script setup lang='ts'>
-import "@fullcalendar/core/vdom"; // solve problem with Vite
+import "@fullcalendar/core/vdom";
 import { CalendarOptions, EventApi, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/vue3";
 import Button from "primevue/button";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -38,6 +38,8 @@ const handleDateSelect = (selectInfo: DateSelectArg) => {
     data: {
       event: selectInfo,
       calendarApi: selectInfo.view.calendar,
+      updateEvent: updateEvent,
+      addEvent: addEvent,
     },
   });
   const calendarApi = selectInfo.view.calendar;
@@ -78,6 +80,8 @@ const handleEventClick = (clickInfo: EventClickArg) => {
                 data: {
                   event: clickInfo.event,
                   calendarApi: clickInfo.view.calendar,
+                  updateEvent: updateEvent,
+                  addEvent: addEvent,
                 },
               });
             },
@@ -88,9 +92,8 @@ const handleEventClick = (clickInfo: EventClickArg) => {
             class: "p-button-danger",
             onClick: async () => {
               clickInfo.event.remove();
-              await DataStore.delete(Events, clickInfo.event.id);
+              await deleteEvent(clickInfo.event.id);
               viewDialogRef.close();
-              toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Deleted" });
             },
           }),
         ];
@@ -136,12 +139,25 @@ const logout = async () => {
   window.location.reload();
 };
 
-const updateEvent = async (eventApi: EventApi) => {
+const updateEvent = async (eventApi: EventApi): Promise<Events | void> => {
   const event = mapEventData(eventApi);
   const eventRes = await DataStore.query(Events, event.id);
   if (!eventRes) return toast.add({ ...TOAST_ERROR_CONFIG, detail: "Event Not Found" });
-  await DataStore.save(Events.copyOf(eventRes, (updated) => Object.assign(updated, event)));
+  const res = await DataStore.save(Events.copyOf(eventRes, (updated) => Object.assign(updated, event)));
   toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
+  return res;
+};
+const addEvent = async (eventApi: EventApi): Promise<Events> => {
+  const event = mapEventData(eventApi);
+  const res = await DataStore.save(new Events(event));
+  toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event added" });
+  return res;
+};
+
+const deleteEvent = async (id: string) => {
+  const res = await DataStore.delete(Events, id);
+  toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event deleted" });
+  return res;
 };
 
 const formatDate = (date: Date) => {
@@ -174,18 +190,6 @@ const calendarOptions = ref<CalendarOptions>({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-  eventAdd: async (addArg) => {
-    const event = mapEventData(addArg.event);
-    if (addArg.event.id) {
-      await updateEvent(addArg.event);
-      return;
-    }
-    await DataStore.save(new Events(event));
-    toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Added" });
-  },
-  eventChange: async (updateArg) => {
-    updateEvent(updateArg.event);
-  },
 });
 
 // **** HOOKS ****
@@ -230,7 +234,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="px-4 pt-4 md:px-1 md:pt-1 text-sm">
+        <div class="px-4 pt-4 text-sm">
           <h3>Instructions</h3>
           <ul class="m-0 py-0 px-4">
             <li class="my-2 mx-0 md:my-1 p-0">Select dates and it will popup dialog form to create a new event</li>
