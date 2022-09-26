@@ -1,18 +1,21 @@
 <template>
   <main>
-    <router-view v-if="auth.route === 'authenticated'" />
-    <un-auth-view v-else />
+    <MainView v-if="auth.user" />
+    <UnAuthView v-else />
   </main>
 </template>
-<script setup lang="ts">
+<script setup lang='ts'>
 import { useAuthenticator } from "@aws-amplify/ui-vue";
 import "@aws-amplify/ui-vue/styles.css";
 import "@fontsource/inter/variable.css";
-import { Amplify } from "aws-amplify";
+import Amplify from "aws-amplify";
 import awsmobile from "./aws-exports";
+// @ts-ignore
+import MainView from "@/views/MainView.vue";
+// @ts-ignore
 import UnAuthView from "./views/UnAuthView.vue";
-const auth = useAuthenticator();
 Amplify.configure(awsmobile);
+const auth = useAuthenticator();
 </script>
 
 <style lang="scss">

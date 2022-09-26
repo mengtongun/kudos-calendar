@@ -22,7 +22,7 @@
   </authenticator>
 </template>
 
-<script>
+<script setup lang='ts'>
 const formFields = {
   signIn: {
     username: {
@@ -67,13 +67,6 @@ const formFields = {
       placeholder: "Enter your Confirmation Code:",
       isRequired: false,
     },
-  },
-};
-export default {
-  setup() {
-    return {
-      formFields,
-    };
   },
 };
 </script>

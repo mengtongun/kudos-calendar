@@ -1,7 +1,5 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-import router from "./router";
-import store from "./store";
 import PrimeVue from "primevue/config";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
@@ -30,8 +28,6 @@ import "primeflex/primeflex.scss";
 import AmplifyVue from "@aws-amplify/ui-vue";
 
 const app = createApp(App);
-app.use(store);
-app.use(router);
 app.use(AmplifyVue);
 app.use(PrimeVue);
 app.use(ToastService);

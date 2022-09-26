@@ -1,6 +1,6 @@
 <script setup lang='ts'>
 import "@fullcalendar/core/vdom"; // solve problem with Vite
-import { CalendarOptions, EventApi, DateSelectArg, EventClickArg } from "@fullcalendar/vue3";
+import { CalendarOptions, EventApi, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/vue3";
 import Button from "primevue/button";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -9,18 +9,19 @@ import interactionPlugin from "@fullcalendar/interaction";
 import EventModalDetailVue from "@/components/EventModalDetail.vue";
 // @ts-ignore
 import EventModalFormVue from "@/components/EventModalForm.vue";
-import { ref, h, onUpdated, onMounted, computed } from "vue";
+import { ref, h, onMounted, computed } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
-import { useStore } from "vuex";
-import { Auth } from "aws-amplify";
+import { Auth, DataStore } from "aws-amplify";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
-import { TOAST_SUCCESS_CONFIG } from "@/constants";
+import { TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
+import { Events } from "@/models";
+import startDataStoreConfig from "@/utils/datastore-config";
+import { mapEventData } from "@/utils/event-utils";
 
 // **** SERVICES ****
 const dialog = useDialog();
 const toast = useToast();
-const store = useStore();
 const auth = useAuthenticator();
 
 // **** METHODS ****
@@ -85,9 +86,9 @@ const handleEventClick = (clickInfo: EventClickArg) => {
             label: "Delete",
             icon: "pi pi-calendar-times",
             class: "p-button-danger",
-            onClick: () => {
+            onClick: async () => {
               clickInfo.event.remove();
-              store.dispatch("delEvent", clickInfo.event);
+              await DataStore.delete(Events, clickInfo.event.id);
               viewDialogRef.close();
               toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Deleted" });
             },
@@ -97,13 +98,15 @@ const handleEventClick = (clickInfo: EventClickArg) => {
     },
   });
 };
+
 const handleEvents = (events: EventApi[]) => {
   currentEvents.value = events;
 };
 const setInitEvents = async () => {
   isFetching.value = true;
-  const events = await store.dispatch("fetchEvents");
-  calendarOptions.value.events = events;
+  await startDataStoreConfig();
+  const events = await DataStore.query(Events);
+  calendarOptions.value.events = events as EventInput[];
   isFetching.value = false;
 };
 const onToggleWeekend = () => {
@@ -128,8 +131,17 @@ const onEventInList = (event: EventApi) => {
 const logout = async () => {
   isLoading.value = true;
   await Auth.signOut();
+  await DataStore.clear();
   isLoading.value = false;
   window.location.reload();
+};
+
+const updateEvent = async (eventApi: EventApi) => {
+  const event = mapEventData(eventApi);
+  const eventRes = await DataStore.query(Events, event.id);
+  if (!eventRes) return toast.add({ ...TOAST_ERROR_CONFIG, detail: "Event Not Found" });
+  await DataStore.save(Events.copyOf(eventRes, (updated) => Object.assign(updated, event)));
+  toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
 };
 
 // **** STATE ****
@@ -158,18 +170,17 @@ const calendarOptions = ref<CalendarOptions>({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
-  eventAdd: async (event) => {
-    if (event.event.id) {
-      await store.dispatch("updateEvent", event.event);
-      toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
+  eventAdd: async (addArg) => {
+    const event = mapEventData(addArg.event);
+    if (addArg.event.id) {
+      await updateEvent(addArg.event);
       return;
     }
-    await store.dispatch("addEvent", event.event);
+    await DataStore.save(new Events(event));
     toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event Added" });
   },
-  eventChange: async (event) => {
-    await store.dispatch("updateEvent", event.event);
-    toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Event updated" });
+  eventChange: async (updateArg) => {
+    updateEvent(updateArg.event);
   },
 });
 
@@ -181,11 +192,12 @@ onMounted(async () => {
 
 <template>
   <div class="kudos-app flex justify-content-between">
-    <div class="m-auto" v-if="isFetching" style="min-width: 10rem">
-      <Image src="logo.png" alt="logo" width="200" heigh="200" class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
-      <ProgressBar mode="indeterminate" style="height: 0.5em" />
+    <div class="flex h-screen w-screen" v-if="isFetching">
+      <div class="m-auto">
+        <Image src="logo.png" alt="logo" width="200" heigh="200" class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
+        <ProgressBar mode="indeterminate" style="height: 0.5em" />
+      </div>
     </div>
-
     <template v-else>
       <Toast />
       <DynamicDialog />
@@ -194,7 +206,7 @@ onMounted(async () => {
           <template v-if="arg.timeText">
             <span :style="{ border: `1px solid ${arg.borderColor}` }">
               <b>{{ arg.event.start.toLocaleTimeString() }} {{ arg.timeText ? "" : "- " }} </b>
-              <i>{{ arg.event.title }}</i>
+              <i class="white-space-nowrap overflow-hidden text-overflow-ellipsis">{{ arg.event.title }}</i>
             </span>
           </template>
           <template v-else>
@@ -272,15 +284,18 @@ onMounted(async () => {
   min-height: 5rem;
 }
 
-.p-image-toolbar {
-  z-index: 1000;
-}
-
 .kudos-event-time {
   font-size: 0.8em;
   padding: 0.2em 0.5em;
   border-radius: 0.3em;
   margin-bottom: 0.2em;
   width: 15em;
+}
+
+.p-image-toolbar {
+  z-index: 1000;
+}
+.p-progressbar .p-progressbar-value {
+  background: #5271ff !important;
 }
 </style>
