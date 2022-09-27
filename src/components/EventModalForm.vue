@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Events, inject, onBeforeMount, reactive, Ref, ref } from "vue";
+import { Events, inject, onBeforeMount, onBeforeUnmount, reactive, Ref, ref } from "vue";
 import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
 import { CalendarApi, DateSelectArg, EventApi } from "@fullcalendar/common";
 import { useToast } from "primevue/usetoast";
 import { Storage } from "@aws-amplify/storage";
+import Editor from "primevue/editor";
 
 // **** SERVICES ****
 const toast = useToast();
@@ -14,6 +15,7 @@ const dialogRef = inject("dialogRef") as Ref;
 const isImg = ref<boolean>(false);
 const img_loading = ref<boolean>(false);
 const img_url = ref<string>("");
+const editorRef = ref<Editor | null>(null);
 const form = reactive({
   id: "",
   title: "",
@@ -104,6 +106,10 @@ onBeforeMount(() => {
     });
   }
 });
+
+onBeforeUnmount(() => {
+  editorRef.value = null;
+});
 </script>
 
 <template>
@@ -173,7 +179,7 @@ onBeforeMount(() => {
         <div class="block">
           <span class="mt-2">
             <label for="description" class="block mb-2">Event Description</label>
-            <Editor v-model="form.description" editorStyle="height: 320px; width: 50vw;">
+            <Editor ref="editorRef" v-model="form.description" editorStyle="height: 320px; width: 50vw;">
               <template #toolbar>
                 <span class="ql-formats">
                   <select class="ql-size">
