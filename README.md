@@ -5,9 +5,9 @@
 
 # Utilized: Amplify x Vue3 Composition API x PrimeVue x Full Calendar
 
+<h3 align="center">Simple Calendar for everyone</h3>
 
-## Simple Calendar for everyone
-## Be more productive with Kudos Calendar
+### Be more productive with Kudos Calendar
 ### Objective
 
 Participate in AWS Amplify Hackathon
@@ -15,6 +15,7 @@ Participate in AWS Amplify Hackathon
 Demo Account:
 
 <br/>
+
 ```
 Email: demo@user.com
 password: 12345678
