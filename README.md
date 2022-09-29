@@ -10,7 +10,9 @@
 ### Be more productive with Kudos Calendar
 ### Objective
 
-Participate in AWS Amplify Hackathon
+Participate in [AWS Amplify Hackathon](https://townhall.hashnode.com/aws-amplify-hackathon)
+
+[Project Article](https://mengtongun.hashnode.dev/kudos-calendar)
 <br/>
 Demo Account:
 
