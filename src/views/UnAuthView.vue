@@ -136,4 +136,7 @@ const formFields = {
 .amplify-icon {
   color: #5271ff;
 }
+.amplify-authenticator__subtitle {
+  color: #5271ff;
+}
 </style>

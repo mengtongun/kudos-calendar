@@ -1,6 +1,6 @@
 <template>
   <main>
-    <MainView v-if="auth.user" />
+    <MainView v-if="route === 'authenticated'" />
     <UnAuthView v-else />
   </main>
 </template>
