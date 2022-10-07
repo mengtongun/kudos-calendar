@@ -190,6 +190,9 @@ const calendarOptions = ref<CalendarOptions>({
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventsSet: handleEvents,
+  eventChange: async (changeInfo) => {
+    await updateEvent(changeInfo.event);
+  },
 });
 
 // **** HOOKS ****
