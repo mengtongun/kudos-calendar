@@ -10,6 +10,11 @@
 ### Be more productive with Kudos Calendar
 ### Objective
 
+## TODO
+- [ ] Update into a personal calendar for users to be able to have their own logos, and names on the calendars.
+- [ ] Add push notifications
+- [ ] Support to Integrate with other third parties application
+
 Participate in [AWS Amplify Hackathon](https://townhall.hashnode.com/aws-amplify-hackathon)
 
 [Project Article](https://mengtongun.hashnode.dev/kudos-calendar)
