@@ -1,6 +1,7 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import PrimeVue from "primevue/config";
+import Aura from "@primevue/themes/aura";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
@@ -17,19 +18,21 @@ import ProgressBar from "primevue/progressbar";
 import FileUpload from "primevue/fileupload";
 import Skeleton from "primevue/skeleton";
 import Card from "primevue/card";
-import FullCalendar from "@fullcalendar/vue3/dist/FullCalendar";
+import FullCalendar from "@fullcalendar/vue3";
 
-// import "primevue/resources/themes/saga-blue/theme.css"; // theme
-import "primevue/resources/themes/vela-blue/theme.css"; // theme
-import "primevue/resources/primevue.min.css"; // core css
+import "@primevue/themes/aura"; // theme
 import "primeicons/primeicons.css"; // icons
-import "primeflex/primeflex.scss";
+import "/node_modules/primeflex/primeflex.css";
 
 import AmplifyVue from "@aws-amplify/ui-vue";
 
 const app = createApp(App);
 app.use(AmplifyVue);
-app.use(PrimeVue);
+app.use(PrimeVue, {
+  theme: {
+    preset: Aura,
+  },
+});
 app.use(ToastService);
 app.use(DialogService);
 

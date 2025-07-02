@@ -1,6 +1,6 @@
 <script setup lang='ts'>
-import "@fullcalendar/core/vdom";
-import { CalendarOptions, EventApi, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/vue3";
+
+import { CalendarOptions, EventApi, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
 import Button from "primevue/button";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -12,7 +12,8 @@ import EventModalFormVue from "@/components/EventModalForm.vue";
 import { ref, h, onMounted, computed } from "vue";
 import { useToast } from "primevue/usetoast";
 import { useDialog } from "primevue/usedialog";
-import { Auth, DataStore } from "aws-amplify";
+import { getCurrentUser } from "aws-amplify/auth";
+import { DataStore } from "@aws-amplify/datastore";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
 import { TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
 import { Events } from "@/models";
@@ -133,7 +134,7 @@ const onEventInList = (event: EventApi) => {
 };
 const logout = async () => {
   isLoading.value = true;
-  await Auth.signOut();
+  await auth.signOut();
   await DataStore.clear();
   isLoading.value = false;
   window.location.reload();
@@ -168,7 +169,7 @@ const formatDate = (date: Date) => {
 const isLoading = ref<boolean>(false);
 const isFetching = ref<boolean>(false);
 const currentEvents = ref<EventApi[]>([]);
-const username = computed(() => auth.user.attributes.name);
+const username = computed(() => auth.user?.attributes?.name || 'User');
 const calendarOptions = ref<CalendarOptions>({
   plugins: [
     dayGridPlugin,
@@ -205,7 +206,8 @@ onMounted(async () => {
   <div class="kudos-app flex justify-content-between">
     <div class="flex h-screen w-screen" v-if="isFetching">
       <div class="m-auto">
-        <Image src="logo.png" alt="logo" width="200" heigh="200" class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
+        <Image src="/logo.png" alt="logo" width="200" heigh="200"
+          class="fadein animation-duration-3000 animation-delay-500 animation-ease-out animation-iteration-infinite" />
         <ProgressBar mode="indeterminate" style="height: 0.5em" />
       </div>
     </div>
@@ -229,7 +231,7 @@ onMounted(async () => {
       <div class="kudos-sidebar border-left-1 border-cyan-100 overflow-y-auto mb-2">
         <!-- //* Profile View -->
         <div class="flex flex-row justify-content-evenly">
-          <img src="logo.png" alt="logo" class="object-contain" style="min-width: 50px" width="145" height="145" />
+          <img src="/logo.png" alt="logo" class="object-contain" style="min-width: 50px" width="145" height="145" />
           <div>
             <h3>{{ username }}</h3>
             <p class="font-italic white-space-nowrap overflow-hidden text-overflow-ellipsis">Calendar for Kudos 🚀</p>
@@ -253,7 +255,7 @@ onMounted(async () => {
           <h3>All Events ({{ currentEvents.length }})</h3>
           <ul class="m-0 py-0 px-4">
             <li v-for="event in currentEvents" :key="event.id">
-              <b class="mr-1">{{ event.allDay ? event.startStr : formatDate(event.start) }}</b>
+              <b class="mr-1">{{ event.allDay ? event.startStr : (event.start ? formatDate(event.start) : '') }}</b>
               <i @click="onEventInList(event)" class="cursor-pointer">{{ event.title }}</i>
             </li>
           </ul>
@@ -263,7 +265,7 @@ onMounted(async () => {
   </div>
 </template>
 
-<style lang='css'  >
+<style lang='css'>
 .kudos-app {
   min-height: 60rem;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
@@ -307,6 +309,7 @@ onMounted(async () => {
 .p-image-toolbar {
   z-index: 1000;
 }
+
 .p-progressbar .p-progressbar-value {
   background: #5271ff !important;
 }

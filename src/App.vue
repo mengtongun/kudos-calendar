@@ -7,8 +7,8 @@
 <script setup lang='ts'>
 import { useAuthenticator } from "@aws-amplify/ui-vue";
 import "@aws-amplify/ui-vue/styles.css";
-import "@fontsource/inter/variable.css";
-import Amplify from "aws-amplify";
+import "@fontsource/inter";
+import { Amplify } from "aws-amplify";
 import awsmobile from "./aws-exports";
 // @ts-ignore
 import MainView from "@/views/MainView.vue";
@@ -22,10 +22,12 @@ const auth = useAuthenticator();
 #app {
   background: #102832;
 }
+
 body {
   margin: 0;
   background: #102832;
 }
+
 .min-w-10rem {
   min-width: 10rem;
 }

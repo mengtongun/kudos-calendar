@@ -1,7 +1,7 @@
-<script  setup lang="ts">
+<script setup lang="ts">
 import { computed, inject, onMounted, ref, Ref } from "vue";
 import { useAuthenticator } from "@aws-amplify/ui-vue";
-import { Storage } from "@aws-amplify/storage";
+import { getUrl } from "aws-amplify/storage";
 
 const dialogRef = inject("dialogRef") as Ref;
 const event = dialogRef.value.data.event;
@@ -10,7 +10,7 @@ const img = ref<string>("");
 const imgLoading = ref<boolean>(false);
 
 // **** COMPUTED ****
-const username = computed(() => auth.user.attributes.name);
+const username = computed(() => auth.user?.attributes?.name || 'User');
 const startLocalTime = computed(() => event.start.toLocaleTimeString());
 const endLocalTime = computed(() => event.end.toLocaleTimeString());
 const startLocalDate = computed(() => event.startStr.split("T")[0]);
@@ -18,12 +18,17 @@ const endLocalDate = computed(() => event.endStr.split("T")[0]);
 const description = computed(() => event.extendedProps.description);
 const imgKey = computed(() => event.extendedProps.img);
 
-onMounted(() => {
+onMounted(async () => {
   if (event.extendedProps?.img) {
     imgLoading.value = true;
-    Storage.get(event.extendedProps.img, { level: "private" }).then((res) => {
-      img.value = res;
-    });
+    try {
+      const result = await getUrl({
+        path: event.extendedProps.img
+      });
+      img.value = result.url.toString();
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
   }
 });
 </script>
@@ -32,7 +37,8 @@ onMounted(() => {
   <Card style="min-width: 20rem; max-width: 30rem">
     <template #header>
       <div v-if="imgKey" class="flex flex-row item-center">
-        <Image v-show="!imgLoading" class="mx-auto border-round-md px-1" imagClass="w-full border-round-md" :src="img" :alt="imgKey" preview @load="imgLoading = false" />
+        <Image v-show="!imgLoading" class="mx-auto border-round-md px-1" imagClass="w-full border-round-md" :src="img"
+          :alt="imgKey" preview @load="imgLoading = false" />
         <Skeleton v-show="imgLoading" class="mx-auto w-28rem h-10rem border-round-md" />
       </div>
     </template>

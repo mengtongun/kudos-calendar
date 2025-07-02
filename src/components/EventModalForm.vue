@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Events, inject, onBeforeMount, onBeforeUnmount, reactive, Ref, ref } from "vue";
 import { FORM_DEFAULT_BG_COLOR, FORM_DEFAULT_BORDER_COLOR, FORM_DEFAULT_TEXT_COLOR, TOAST_ERROR_CONFIG, TOAST_SUCCESS_CONFIG } from "@/constants";
-import { CalendarApi, DateSelectArg, EventApi } from "@fullcalendar/common";
+import { CalendarApi, DateSelectArg, EventApi } from "@fullcalendar/core";
 import { useToast } from "primevue/usetoast";
-import { Storage } from "@aws-amplify/storage";
+import { getUrl, uploadData } from "aws-amplify/storage";
 import Editor from "primevue/editor";
 
 // **** SERVICES ****
@@ -15,7 +15,7 @@ const dialogRef = inject("dialogRef") as Ref;
 const isImg = ref<boolean>(false);
 const img_loading = ref<boolean>(false);
 const img_url = ref<string>("");
-const editorRef = ref<Editor | null>(null);
+const editorRef = ref<typeof Editor | null>(null);
 const form = reactive({
   id: "",
   title: "",
@@ -69,24 +69,31 @@ const onAddEvent = async () => {
 /* eslint-disable */
 const onUploader = async (event: any) => {
   const file = event.files[0] as File;
-  const res = await Storage.put(file.name, file, {
-    level: "private",
-    contentType: file.type,
-  });
-
-  form.img = res.key;
-  toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Image uploaded" });
-  if (form.img) {
-    img_loading.value = true;
-    Storage.get(form.img, { level: "private" }).then((res) => {
-      img_url.value = res;
+  try {
+    const result = await uploadData({
+      key: file.name,
+      data: file,
+      options: {
+        contentType: file.type,
+      }
     });
+
+    form.img = file.name;
+    toast.add({ ...TOAST_SUCCESS_CONFIG, detail: "Image uploaded" });
+    if (form.img) {
+      img_loading.value = true;
+      const urlResult = await getUrl({ key: form.img });
+      img_url.value = urlResult.url.toString();
+    }
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    toast.add({ ...TOAST_ERROR_CONFIG, detail: "Error uploading image" });
   }
   return file;
 };
 
 // **** HOOKS ****
-onBeforeMount(() => {
+onBeforeMount(async () => {
   const event = dialogRef.value.data.event as EventApi & DateSelectArg;
   eventRef.value = event;
   form.id = event.id;
@@ -101,9 +108,12 @@ onBeforeMount(() => {
   form.img = event.extendedProps?.img || "";
   if (form.img) {
     img_loading.value = true;
-    Storage.get(form.img, { level: "private" }).then((res) => {
-      img_url.value = res;
-    });
+    try {
+      const result = await getUrl({ key: form.img });
+      img_url.value = result.url.toString();
+    } catch (error) {
+      console.error('Error fetching image:', error);
+    }
   }
 });
 
@@ -160,7 +170,8 @@ onBeforeUnmount(() => {
           <p class="my-auto mr-4 font-bold cursor-pointer" @click="isImg = !isImg">Event Image</p>
         </div>
         <div class="flex flex-row justify-content-start mt-2">
-          <FileUpload v-if="isImg" name="img[]" :multiple="false" accept="image/*" :previewWidth="250" :maxFileSize="5000000" :customUpload="true" @uploader="onUploader" />
+          <FileUpload v-if="isImg" name="img[]" :multiple="false" accept="image/*" :previewWidth="250"
+            :maxFileSize="5000000" :customUpload="true" @uploader="onUploader" />
         </div>
       </div>
 
@@ -168,7 +179,8 @@ onBeforeUnmount(() => {
       <div class="my-4" v-else>
         <p class="my-auto mr-4 font-bold cursor-pointer text-blue-500" @click="isImg = !isImg">Image Uploaded</p>
         <div class="flex flex-row justify-content-start mt-2">
-          <Image v-show="!img_loading" class="" imageClass="w-15rem border-round-md" :src="img_url" :alt="form.img" preview @load="img_loading = false" />
+          <Image v-show="!img_loading" class="" imageClass="w-15rem border-round-md" :src="img_url" :alt="form.img"
+            preview @load="img_loading = false" />
           <Skeleton v-show="img_loading" class="w-15rem h-8rem my-4 border-round-md" />
         </div>
       </div>
@@ -209,7 +221,8 @@ onBeforeUnmount(() => {
           <div class="block mb-4">
             <label for="backgroundColor" class="block mb-2">Background Color</label>
             <span class="flex flex-row justify-content-start align-items-center gap-2">
-              <ColorPicker v-model="form.backgroundColor" @change="form.backgroundColor = '#' + form.backgroundColor" class="vertical-align-middle" />
+              <ColorPicker v-model="form.backgroundColor" @change="form.backgroundColor = '#' + form.backgroundColor"
+                class="vertical-align-middle" />
               <InputText id="backgroundColor" type="text" v-model="form.backgroundColor" class="w-7" />
             </span>
           </div>
@@ -217,7 +230,8 @@ onBeforeUnmount(() => {
           <div class="block mb-4">
             <label for="borderColor" class="block mb-2">Border Color</label>
             <span class="flex flex-row justify-content-start align-items-center gap-2">
-              <ColorPicker v-model="form.borderColor" @change="form.borderColor = '#' + form.borderColor" class="vertical-align-middle" />
+              <ColorPicker v-model="form.borderColor" @change="form.borderColor = '#' + form.borderColor"
+                class="vertical-align-middle" />
               <InputText id="borderColor" type="text" v-model="form.borderColor" class="w-7" />
             </span>
           </div>
@@ -225,7 +239,8 @@ onBeforeUnmount(() => {
           <div class="block mb-4">
             <label for="textColor" class="block mb-2">Text Color</label>
             <span class="flex flex-row justify-content-start align-items-center gap-2">
-              <ColorPicker v-model="form.textColor" @change="form.textColor = '#' + form.textColor" class="vertical-align-middle" />
+              <ColorPicker v-model="form.textColor" @change="form.textColor = '#' + form.textColor"
+                class="vertical-align-middle" />
               <InputText id="textColor" type="text" v-model="form.textColor" class="w-7" />
             </span>
           </div>
@@ -236,8 +251,8 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.p-float-label input:focus ~ label,
-.p-float-label input.p-filled ~ label {
+.p-float-label input:focus~label,
+.p-float-label input.p-filled~label {
   top: -1.5rem;
 }
 </style>
