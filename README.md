@@ -8,9 +8,11 @@
 <h3 align="center">Simple Calendar for everyone</h3>
 
 ### Be more productive with Kudos Calendar
+
 ### Objective
 
 ## TODO
+
 - [ ] Update into a personal calendar for users to be able to have their own logos, and names on the calendars.
 - [ ] Add push notifications
 - [ ] Support to Integrate with other third parties application
@@ -29,28 +31,38 @@ password: 12345678
 ```
 
 ## Project setup
+
+```bash
+# Install dependencies
+npm install
 ```
-yarn install
+
+## Development
+
+```bash
+# Start development server with hot-reload
+npm run dev
+```
+
+## Building for Production
+
+```bash
+# Build for production
+npm run build
+
+# Preview production build locally
+npm run preview
+```
+
+## Linting
+
+```bash
+# Lint and fix files
+npm run lint
 ```
 
 ## AWS Set Up (Already setup amplify studio only)
+
 ```
 amplify pull --appId <appId> --envName <envName>
 ```
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
